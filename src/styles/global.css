@@ -150,11 +150,9 @@ body {
 
 .submit-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 16px;
-  height: var(--header-height);
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 16px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
@@ -163,74 +161,50 @@ body {
 
 @media (min-width: 768px) {
   .submit-bar {
-    padding: 0 24px;
-    gap: 16px;
+    padding: 10px 24px;
+    gap: 8px;
   }
 }
 
-.submit-bar__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-}
-
-/* Breadcrumb */
-.submit-bar__breadcrumb {
+/* Row 1: doc name + actions */
+.submit-bar__row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 12px;
   min-width: 0;
 }
 
-.submit-bar__breadcrumb-sep {
-  color: var(--color-border);
-  flex-shrink: 0;
+/* Row 2: stepper + metadata */
+.submit-bar__row--sub {
+  gap: 16px;
 }
 
-.submit-bar__breadcrumb-item {
+.submit-bar__name {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
 }
 
-.submit-bar__breadcrumb-item--muted {
+/* Metadata row: version · date (· user on desktop) */
+.submit-bar__meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
   color: var(--color-text-muted);
-  font-weight: 400;
   flex-shrink: 0;
-}
-
-.submit-bar__name {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Hide metadata row on mobile — breadcrumb alone is enough context */
-.submit-bar__details {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .submit-bar__details {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--color-text-muted);
-  }
-}
-
-.submit-bar__details svg {
-  flex-shrink: 0;
 }
 
 .submit-bar__version {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-primary);
 }
 
@@ -238,11 +212,19 @@ body {
   color: var(--color-border);
 }
 
-.submit-bar__date,
-.submit-bar__user {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.submit-bar__separator--hide-mobile {
+  display: none;
+}
+
+.submit-bar__user--hide-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .submit-bar__separator--hide-mobile,
+  .submit-bar__user--hide-mobile {
+    display: inline;
+  }
 }
 
 .submit-bar__actions {
@@ -258,7 +240,7 @@ body {
   }
 }
 
-/* Hidden on mobile — the issues tab badge already communicates this */
+/* Hidden on mobile — the issues tab badge communicates blocking count */
 .submit-bar__blocking-msg {
   display: none;
 }
@@ -271,6 +253,7 @@ body {
     font-size: 12px;
     color: var(--color-critical);
     font-weight: 500;
+    white-space: nowrap;
   }
 }
 
@@ -281,6 +264,103 @@ body {
   font-size: 12px;
   color: #16a34a;
   font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ── Step Indicator ──────────────────────────────────────── */
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.step-indicator__step {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.step-indicator__dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.step-indicator__step--done .step-indicator__dot {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.step-indicator__step--current .step-indicator__dot {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.step-indicator__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.step-indicator__step--done .step-indicator__label {
+  color: var(--color-text-muted);
+}
+
+.step-indicator__step--current .step-indicator__label {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.step-indicator__connector {
+  width: 24px;
+  height: 2px;
+  background: var(--color-border);
+  margin: 0 6px;
+  border-radius: 1px;
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+
+.step-indicator__connector--filled {
+  background: var(--color-primary);
+}
+
+/* Mobile: hide all labels except current step, shrink connectors + dots */
+@media (max-width: 767px) {
+  .step-indicator__label {
+    display: none;
+  }
+
+  /* Show only the active step label so the user knows where they are */
+  .step-indicator__step--current .step-indicator__label {
+    display: inline;
+    font-size: 12px;
+  }
+
+  .step-indicator__connector {
+    width: 12px;
+    margin: 0 3px;
+  }
+
+  .step-indicator__dot {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 /* ── Document Viewer ─────────────────────────────────────── */
@@ -628,7 +708,7 @@ body {
 }
 
 .skeleton--header {
-  height: var(--header-height);
+  height: 72px;
   flex-shrink: 0;
 }
 .skeleton--viewer {

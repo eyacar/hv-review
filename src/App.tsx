@@ -56,7 +56,7 @@ function PageLoader() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100vh',
+        height: '100dvh',
         background: 'var(--color-bg)',
         color: 'var(--color-text-muted)',
         fontFamily: 'var(--font-body)',

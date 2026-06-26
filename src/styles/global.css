@@ -30,7 +30,7 @@ body {
 .review-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -75,7 +75,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: 100dvh;
   gap: 12px;
   color: var(--color-text-primary);
 }
@@ -917,7 +917,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: 24px;
   background: var(--color-bg);
 }
@@ -966,7 +966,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: 24px;
   background: var(--color-bg);
 }
@@ -1009,7 +1009,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: 100dvh;
   gap: 8px;
   text-align: center;
   padding: 24px;

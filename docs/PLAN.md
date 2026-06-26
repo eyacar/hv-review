@@ -307,14 +307,14 @@ The review `id` comes from the URL via `useParams()`. That single value drives t
 
 ## State Management
 
-| State                              | Where       | Why                                                  |
-| ---------------------------------- | ----------- | ---------------------------------------------------- |
-| Review data (loading, error, data) | React Query | Server state, async lifecycle                        |
-| Current PDF page                   | Zustand     | Shared between DocumentViewer and IssuesPanel        |
-| Ignored minor issues               | Zustand     | Shared between IssueCard, SubmitBar                  |
-| Active mobile tab                  | Zustand     | IssueCard switches tabs without prop drilling        |
-| PDF zoom level                     | useState    | Local to DocumentViewer, no sibling needs it         |
-| UI-only state (hover, open/close)  | useState    | Local, no sharing needed                             |
+| State                              | Where       | Why                                           |
+| ---------------------------------- | ----------- | --------------------------------------------- |
+| Review data (loading, error, data) | React Query | Server state, async lifecycle                 |
+| Current PDF page                   | Zustand     | Shared between DocumentViewer and IssuesPanel |
+| Ignored minor issues               | Zustand     | Shared between IssueCard, SubmitBar           |
+| Active mobile tab                  | Zustand     | IssueCard switches tabs without prop drilling |
+| PDF zoom level                     | useState    | Local to DocumentViewer, no sibling needs it  |
+| UI-only state (hover, open/close)  | useState    | Local, no sharing needed                      |
 
 ---
 
@@ -424,10 +424,14 @@ The current step is derived from the `status` field in the API response via a si
 ```ts
 function statusToStepIndex(status: ReviewStatus): number {
   switch (status) {
-    case 'created':    return 0
-    case 'processing': return 1
-    case 'on_review':  return 2
-    case 'submitted':  return 3
+    case 'created':
+      return 0
+    case 'processing':
+      return 1
+    case 'on_review':
+      return 2
+    case 'submitted':
+      return 3
   }
 }
 ```

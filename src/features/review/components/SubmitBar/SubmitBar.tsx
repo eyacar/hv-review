@@ -1,5 +1,7 @@
 import { memo, useMemo, useCallback, useId } from 'react'
-import { CheckCircle, XCircle, Clock } from 'lucide-react'
+import { Helmet } from 'react-helmet-async'
+import { Link } from 'react-router-dom'
+import { CheckCircle, XCircle, Upload, ChevronRight } from 'lucide-react'
 import { useReviewStore } from '../../store/reviewStore'
 import { useSubmitReview } from '../../hooks/useReview'
 import { cn } from '../../../../lib/cn'
@@ -16,11 +18,15 @@ interface SubmitBarProps {
 }
 
 /**
- * Header bar with review metadata and submit button.
+ * Header bar with:
+ * - Dynamic page title via react-helmet-async (proper React way, no document.title in effects)
+ * - Breadcrumb: Reviews / [doc name] for context
+ * - Review metadata: version, date, assigned user
+ * - Submit button — blocked when critical/major issues remain
+ * - "Upload new version" CTA — visible when blocking issues exist, links back to /upload
  *
- * Submit is blocked when any critical or major issue is unresolved.
- * Uses aria-disabled (not just disabled) so the button is still reachable
- * by keyboard and screen readers can announce why it's blocked.
+ * Submit uses aria-disabled (not just disabled) so keyboard users can still reach it
+ * and screen readers can announce why it's blocked via aria-describedby.
  */
 export const SubmitBar = memo(function SubmitBar({
   reviewId,
@@ -59,58 +65,84 @@ export const SubmitBar = memo(function SubmitBar({
     [uploadedAt]
   )
 
+  const pageTitle = `${reviewName} — Review`
+
   return (
-    <header className="submit-bar" role="banner">
-      <div className="submit-bar__meta">
-        <h1 className="submit-bar__name" title={reviewName}>
-          {reviewName}
-        </h1>
-        <div className="submit-bar__details">
-          <span className="submit-bar__version">v{version}</span>
-          <span className="submit-bar__separator" aria-hidden="true">
-            ·
-          </span>
-          <span className="submit-bar__date">
-            <Clock size={13} aria-hidden="true" />
-            {formattedDate}
-          </span>
-          <span className="submit-bar__separator" aria-hidden="true">
-            ·
-          </span>
-          <span className="submit-bar__user">{userName}</span>
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+      </Helmet>
+
+      <header className="submit-bar" role="banner">
+        <div className="submit-bar__meta">
+          {/* Breadcrumb */}
+          <nav className="submit-bar__breadcrumb" aria-label="Breadcrumb">
+            <span className="submit-bar__breadcrumb-item submit-bar__breadcrumb-item--muted">
+              Reviews
+            </span>
+            <ChevronRight size={12} aria-hidden="true" className="submit-bar__breadcrumb-sep" />
+            <span
+              className="submit-bar__breadcrumb-item submit-bar__name"
+              title={reviewName}
+              aria-current="page"
+            >
+              {reviewName}
+            </span>
+          </nav>
+
+          {/* Metadata */}
+          <div className="submit-bar__details">
+            <span className="submit-bar__version">v{version}</span>
+            <span className="submit-bar__separator" aria-hidden="true">
+              ·
+            </span>
+            <span className="submit-bar__date">{formattedDate}</span>
+            <span className="submit-bar__separator" aria-hidden="true">
+              ·
+            </span>
+            <span className="submit-bar__user">{userName}</span>
+          </div>
         </div>
-      </div>
 
-      <div className="submit-bar__actions">
-        {!canSubmit && (
-          <p
-            id={blockingDescId}
-            className="submit-bar__blocking-msg"
-            role="alert"
-            aria-live="polite"
+        <div className="submit-bar__actions">
+          {!canSubmit && (
+            <p id={blockingDescId} className="submit-bar__blocking-msg" role="alert">
+              <XCircle size={14} aria-hidden="true" />
+              {blockingIssues.length} issue{blockingIssues.length > 1 ? 's' : ''} blocking
+              submission
+            </p>
+          )}
+
+          {isSuccess && (
+            <p className="submit-bar__success-msg">
+              <CheckCircle size={14} aria-hidden="true" />
+              Submitted successfully
+            </p>
+          )}
+
+          {/* Show upload CTA only when there are blocking issues */}
+          {!canSubmit && (
+            <Link
+              to="/upload"
+              className="btn btn--secondary"
+              aria-label="Upload a new document version"
+            >
+              <Upload size={14} aria-hidden="true" />
+              Upload new version
+            </Link>
+          )}
+
+          <button
+            type="button"
+            className={cn('btn btn--primary', { 'btn--disabled': !canSubmit || isPending })}
+            onClick={handleSubmit}
+            aria-disabled={!canSubmit || isPending}
+            aria-describedby={!canSubmit ? blockingDescId : undefined}
           >
-            <XCircle size={14} aria-hidden="true" />
-            {blockingIssues.length} issue{blockingIssues.length > 1 ? 's' : ''} blocking submission
-          </p>
-        )}
-
-        {isSuccess && (
-          <p className="submit-bar__success-msg">
-            <CheckCircle size={14} aria-hidden="true" />
-            Submitted successfully
-          </p>
-        )}
-
-        <button
-          type="button"
-          className={cn('btn btn--primary', { 'btn--disabled': !canSubmit || isPending })}
-          onClick={handleSubmit}
-          aria-disabled={!canSubmit || isPending}
-          aria-describedby={!canSubmit ? blockingDescId : undefined}
-        >
-          {isPending ? 'Submitting…' : 'Submit Review'}
-        </button>
-      </div>
-    </header>
+            {isPending ? 'Submitting…' : 'Submit Review'}
+          </button>
+        </div>
+      </header>
+    </>
   )
 })

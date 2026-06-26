@@ -168,10 +168,35 @@ body {
   min-width: 0;
 }
 
-.submit-bar__name {
+/* Breadcrumb */
+.submit-bar__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.submit-bar__breadcrumb-sep {
+  color: var(--color-border);
+  flex-shrink: 0;
+}
+
+.submit-bar__breadcrumb-item {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.submit-bar__breadcrumb-item--muted {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.submit-bar__name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -514,6 +539,17 @@ body {
 
 .btn--primary:hover:not(.btn--disabled) {
   background: var(--btn-primary-hover);
+}
+
+.btn--secondary {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--btn-secondary-border);
+  text-decoration: none;
+}
+
+.btn--secondary:hover {
+  background: var(--color-surface-muted);
 }
 
 .btn--disabled {

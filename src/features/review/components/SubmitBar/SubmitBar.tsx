@@ -1,5 +1,4 @@
 import { memo, useMemo, useCallback, useId, Fragment } from 'react'
-import { Helmet } from 'react-helmet-async'
 import { Link } from 'react-router-dom'
 import { CheckCircle, XCircle, Upload, Check } from 'lucide-react'
 import { useReviewStore } from '../../store/reviewStore'
@@ -125,9 +124,8 @@ export const SubmitBar = memo(function SubmitBar({
 
   return (
     <>
-      <Helmet>
-        <title>{reviewName} — Review</title>
-      </Helmet>
+      {/* React 19 natively hoists <title> to <head> — no library needed */}
+      <title>{reviewName} — Review</title>
 
       <header className="submit-bar" role="banner">
         {/* Row 1: doc name + actions */}

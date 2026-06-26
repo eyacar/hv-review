@@ -175,6 +175,12 @@ GitHub Actions runs on every push and PR to `main`:
 
 ---
 
+## Design
+
+[`docs/design.html`](docs/design.html) — open in a browser. Contains annotated wireframes for the desktop and mobile layouts, plus a table of key design decisions and the alternatives considered (PDF rendering strategy, mobile navigation pattern, submission blocking, accessibility approach).
+
+---
+
 ## Architecture notes
 
 For the full reasoning behind every technical decision — why Vite over Next.js, why Zustand over Context, how the PDF text layer works, the horizontal scroll fix, the mobile tab architecture, and what production would require — see [`docs/PLAN.md`](docs/PLAN.md).

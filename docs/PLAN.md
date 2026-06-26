@@ -142,12 +142,17 @@ Today, `getReview()` returns mock data with a simulated delay. When the backend 
 
 ### Zustand
 
-The PDF viewer and the issues panel are siblings in the component tree. They need to share two pieces of state:
+The PDF viewer and the issues panel are siblings in the component tree. They need to share several pieces of state:
 
 1. `currentPage` — when the user clicks an issue, the PDF should scroll to the corresponding page. When the PDF page changes, the active issue in the panel can update accordingly.
 2. `ignoredIssues` — the set of minor issue IDs the user has chosen to ignore. This state affects whether submission is allowed, which is computed in the header.
+3. `activeMobileTab` — on mobile, only one panel is visible at a time (Document or Issues). When the user clicks an issue, the app should switch to the Document tab automatically. Without Zustand, `IssueCard` would have needed to receive `setActiveTab` threaded down through `IssuesPanel` → `IssueCard` — two levels of prop drilling for a prop neither intermediate component cares about.
 
 Lifting this state to a common ancestor and threading it down via props would work, but it leads to prop drilling — one of the most common pain points in growing React codebases. Components that don't care about the state end up receiving and forwarding it just to pass it deeper, which creates unnecessary coupling and makes refactoring painful. Zustand solves this cleanly: each component subscribes only to what it needs, with a small focused store and no Redux boilerplate or Context gymnastics.
+
+### React 19 document metadata
+
+`react-helmet-async` was initially considered for managing the page `<title>`. React 19 made this unnecessary — it natively hoists `<title>`, `<meta>`, and `<link>` elements from anywhere in the component tree to `<head>`. A plain `<title>{reviewName} — Review</title>` inside `SubmitBar` is all that's needed. No provider, no wrapper, no library.
 
 ---
 
@@ -173,40 +178,42 @@ The project follows a feature-based architecture. Each feature owns its componen
 ```
 src/
 ├── api/
-│   ├── review.ts          # getReview() — the mock today, real fetch tomorrow
+│   ├── review.ts          # getReview() and submitReview() — mock today, real fetch tomorrow
 │   ├── types.ts           # TypeScript types for the API response
 │   └── mock/
 │       └── review.json    # Mock data provided in the spec
 │
 ├── features/
 │   └── review/
+│       ├── __tests__/
+│       │   └── submissionLogic.test.ts  # Pure unit tests for submission gating
 │       ├── components/
-│       │   ├── DocumentViewer/    # PDF renderer with page navigation
-│       │   ├── IssuesPanel/       # Sidebar with issue list
-│       │   ├── IssueCard/         # Individual issue item
-│       │   ├── SubmitBar/         # Header/footer with submit button
-│       │   └── StatusBadge/       # Critical / Major / Minor badge
+│       │   ├── DocumentViewer/    # PDF renderer, zoom controls, drag-to-scroll
+│       │   ├── IssuesPanel/       # Issues sidebar
+│       │   ├── IssueCard/         # Individual issue item (with tests)
+│       │   ├── ReviewError/       # Domain-specific error state (thin wrapper)
+│       │   ├── ReviewSkeleton/    # Layout-specific loading skeleton
+│       │   ├── StatusBadge/       # Critical / Major / Minor badge (with tests)
+│       │   └── SubmitBar/         # Header: doc name, step indicator, actions
 │       ├── hooks/
-│       │   └── useReview.ts       # React Query hook wrapping getReview()
-│       ├── store/
-│       │   └── reviewStore.ts     # Zustand store (currentPage, ignoredIssues)
-│       └── types/
-│           └── index.ts           # Feature-level derived types
+│       │   └── useReview.ts       # React Query hooks: useReview, useSubmitReview
+│       └── store/
+│           └── reviewStore.ts     # Zustand: currentPage, ignoredIssues, activeMobileTab
 │
 ├── lib/
-│   └── auth.ts            # getToken() — reads JWT from localStorage
+│   ├── auth.ts            # getToken() — reads JWT from localStorage
+│   └── cn.ts              # clsx utility for conditional classNames
+│
+├── pages/
+│   └── ReviewPage.tsx     # Route component — composes feature components
 │
 ├── shared/
-│   ├── components/
-│   │   ├── Button/
-│   │   ├── Badge/
-│   │   ├── Skeleton/
-│   │   └── ErrorBoundary/
-│   └── hooks/
-│       └── useKeyboardShortcut.ts
+│   └── components/
+│       └── ErrorState/    # Generic reusable error component
 │
 ├── styles/
-│   └── tokens.css         # All design tokens as CSS variables
+│   ├── tokens.css         # All design tokens as CSS variables
+│   └── global.css         # Layout, component styles, animations
 │
 └── main.tsx
 ```
@@ -300,12 +307,14 @@ The review `id` comes from the URL via `useParams()`. That single value drives t
 
 ## State Management
 
-| State                              | Where       | Why                           |
-| ---------------------------------- | ----------- | ----------------------------- |
-| Review data (loading, error, data) | React Query | Server state, async lifecycle |
-| Current PDF page                   | Zustand     | Shared between siblings       |
-| Ignored minor issues               | Zustand     | Shared between siblings       |
-| UI-only state (hover, open/close)  | useState    | Local, no sharing needed      |
+| State                              | Where       | Why                                                  |
+| ---------------------------------- | ----------- | ---------------------------------------------------- |
+| Review data (loading, error, data) | React Query | Server state, async lifecycle                        |
+| Current PDF page                   | Zustand     | Shared between DocumentViewer and IssuesPanel        |
+| Ignored minor issues               | Zustand     | Shared between IssueCard, SubmitBar                  |
+| Active mobile tab                  | Zustand     | IssueCard switches tabs without prop drilling        |
+| PDF zoom level                     | useState    | Local to DocumentViewer, no sibling needs it         |
+| UI-only state (hover, open/close)  | useState    | Local, no sharing needed                             |
 
 ---
 
@@ -392,15 +401,72 @@ I use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ---
 
+## Mobile Layout
+
+On desktop, the document and issues panel sit side by side. On mobile (< 768px), both panels don't fit — the layout switches to a tab bar at the bottom of the screen.
+
+```
+[Document] [Issues  3]   ← tab bar, badge shows blocking count
+```
+
+The tab state (`activeMobileTab: 'document' | 'issues'`) lives in the Zustand store rather than in `ReviewPage`. This is the key decision: `IssueCard` — deep in the tree — calls `setActiveMobileTab('document')` directly when the user clicks "Go to page." If the state were local to `ReviewPage`, this action would require threading a setter down through `IssuesPanel` → `IssueCard`, coupling two intermediary components to a concern they don't own.
+
+The CSS hides the inactive panel via `.review-layout__panel--hidden { display: none }` on mobile. On desktop, both panels are always visible regardless of `activeMobileTab`.
+
+---
+
+## Step Indicator
+
+The header shows a four-step workflow indicator: **Upload → Processing → Review → Submitted**. This gives users orientation — they know what stage they're in and what comes next.
+
+The current step is derived from the `status` field in the API response via a simple switch:
+
+```ts
+function statusToStepIndex(status: ReviewStatus): number {
+  switch (status) {
+    case 'created':    return 0
+    case 'processing': return 1
+    case 'on_review':  return 2
+    case 'submitted':  return 3
+  }
+}
+```
+
+On mobile, step labels are hidden to save space — only the current step's label is shown (via CSS). The dots remain visible so orientation is preserved without taking up a full row.
+
+---
+
+## PDF Viewer UX
+
+### Zoom
+
+Zoom runs from 50% to 200% in 25% increments. The page width passed to `react-pdf` is `Math.floor(containerWidth * zoom)` — `containerWidth` is measured via `ResizeObserver`, so the document always fills the available space at 100% and scales proportionally at other levels.
+
+Zoom state is local to `DocumentViewer` — no other component needs it, so there's no reason to put it in the store.
+
+### Horizontal scroll at high zoom
+
+When the document is wider than the container (> 100% zoom), it needs to scroll horizontally. A naive `align-items: center` on the flex scroll container overflows content equally on both sides, making the left side unreachable — the browser's scroll origin is at 0 and you can't scroll to negative values.
+
+The fix is `align-items: flex-start` on the scroll container + `margin: 0 auto` on the document itself. At 100% zoom the document centers itself via auto margins. At high zoom, overflow goes right-only, and the full scroll range is accessible.
+
+### Drag-to-scroll
+
+On macOS, overlay scrollbars are invisible until you hover. Users have no visual affordance that the document is scrollable. The viewer implements click-and-drag panning: `mousedown` records the scroll position and cursor coordinates, `mousemove` updates scroll position by the delta, `mouseup`/`mouseleave` ends the drag. The cursor changes to `grabbing` during the drag. This is the standard pattern used by PDF viewers, design tools (Figma), and map interfaces.
+
+---
+
 ## Testing
 
 **Vitest** (native to Vite) + **React Testing Library**.
 
-Priority areas for tests:
+Three test files are included:
 
-- Submission logic: given a set of issues with various severities and ignored states, can submit? (pure logic, easy to unit test)
-- IssueCard: renders severity badge correctly, ignore button works for minor issues
-- SubmitBar: disabled when blockers exist, enabled when clear
+**`submissionLogic.test.ts`** — 8 pure unit tests with no React or mocks. Covers the full matrix of submission gating: blocks on critical, blocks on major, allows minor-only, allows when all blocking issues are ignored, partial ignore still blocks. These are the highest-value tests: the logic is pure, the cases are clear, and they run in milliseconds.
+
+**`IssueCard.test.tsx`** — tests the most interactive component. Verifies that clicking the card calls both `setCurrentPage` and `setActiveMobileTab('document')` (the mobile tab fix), that the ignore/unignore buttons call the right store actions, and that the ignore button doesn't appear for non-minor issues. Uses `vi.mock` to mock the Zustand store.
+
+**`StatusBadge.test.tsx`** — verifies WCAG 1.4.1: each severity renders a visible text label, not just a color. This is the kind of test that prevents an "obviously wrong" regression from slipping through.
 
 Integration tests over unit tests where possible — test behavior, not implementation.
 
@@ -435,3 +501,7 @@ Two things stood out:
 **Connecting issues to document pages.** The UX decision to make issues clickable — jumping to the right page in the PDF — required coordinating state between two sibling components that have no natural parent-child relationship. The Zustand store handles this cleanly, but the decision of _where_ to put this logic (not in either component, not in a prop-drilled parent, but in a dedicated store slice) is the kind of architectural judgment that matters in a real codebase.
 
 **Performance: rendering 34 pages without blocking the UI.** Rendering all PDF pages at once is a non-starter — each page is a canvas element that pdfjs renders in a worker thread, and doing all 34 up front causes a noticeable load spike. The solution is lazy rendering via `IntersectionObserver`: pages are only rendered when they enter (or are about to enter) the viewport, and unloaded when they scroll far away. This keeps memory usage flat regardless of document length. The pdfjs worker itself is also configured to run off the main thread, so heavy decode operations don't block user interactions. Getting the worker path right in a Vite build (it needs to be treated as a static asset, not bundled) was one of the more finicky parts of the setup.
+
+**Horizontal scroll at high zoom.** A seemingly simple feature — zoom the PDF — revealed a subtle CSS behavior. `align-items: center` on a flex scroll container distributes overflow equally on both sides. Since the browser's scroll origin is at `0`, negative scroll positions are inaccessible, making the left side of a wide document unreachable. The fix (`align-items: flex-start` + `margin: 0 auto` on the child) is clean once you understand why it works — the document centers itself with auto margins when it fits, and overflows to the right when it doesn't.
+
+**Mobile tab coordination without prop drilling.** On mobile, clicking an issue should both jump to the right page _and_ switch to the Document tab. `IssueCard` is two levels deep inside the panel. The naive approach — pass `setActiveTab` from `ReviewPage` → `IssuesPanel` → `IssueCard` — would couple two components to a prop they don't use. Adding `activeMobileTab` to the Zustand store let `IssueCard` call `setActiveMobileTab` directly, with no intermediary coupling.

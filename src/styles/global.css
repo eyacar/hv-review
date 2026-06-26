@@ -365,23 +365,108 @@ body {
 
 /* ── Document Viewer ─────────────────────────────────────── */
 
+/* Wrapper is the flex child; viewer scrolls inside it */
+.document-viewer-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* clips the toolbar; child .document-viewer has overflow:auto */
+  min-width: 0;
+}
+
 .document-viewer {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto; /* both axes — horizontal scroll kicks in when zoomed */
   background: var(--color-surface-muted);
   padding: 24px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: flex-start so overflow goes right only.
+     The document centers itself via margin: 0 auto when it fits the container.
+     With align-items: center, content wider than the container overflows both sides
+     and you can't scroll left — flex-start fixes that. */
+  align-items: flex-start;
   gap: 16px;
+  cursor: grab;
+}
+
+.document-viewer:active {
+  cursor: grabbing;
+}
+
+/* ── Document Toolbar (zoom controls) ───────────────────── */
+
+/* Sits between the header and the scroll area — never overlaps content */
+.document-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.zoom-controls__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.zoom-controls__btn:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+  color: var(--color-text-primary);
+}
+
+.zoom-controls__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.zoom-controls__btn--reset {
+  margin-left: 4px;
+  border-left: 1px solid var(--color-border);
+  padding-left: 6px;
+  border-radius: 0;
+  width: auto;
+}
+
+.zoom-controls__level {
+  min-width: 48px;
+  height: 28px;
+  padding: 0 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  text-align: center;
+}
+
+.zoom-controls__level:hover {
+  background: var(--color-surface-muted);
 }
 
 .document-viewer__document {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 100%;
-  max-width: 700px;
+  /* Centers when it fits the container; scrollable from the left edge when zoomed */
+  margin: 0 auto;
+  min-width: min-content;
 }
 
 .document-viewer__page-wrapper {

@@ -1,9 +1,10 @@
-import { memo, useMemo, useCallback, useId, Fragment } from 'react'
+import { memo, useMemo, useCallback, useId, useEffect, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle, XCircle, Upload, Check } from 'lucide-react'
 import { useReviewStore } from '../../store/reviewStore'
 import { useSubmitReview } from '../../hooks/useReview'
 import { cn } from '../../../../lib/cn'
+import { ThemeToggle } from '../../../../shared/components/ThemeToggle/ThemeToggle'
 import type { Issue, ReviewStatus } from '../../../../api/types'
 
 // ── Step indicator ────────────────────────────────────────────
@@ -112,6 +113,13 @@ export const SubmitBar = memo(function SubmitBar({
     submit(reviewId)
   }, [canSubmit, isPending, submit, reviewId])
 
+  useEffect(() => {
+    document.title = `${reviewName} — Review`
+    return () => {
+      document.title = 'Document Review — HomeVision'
+    }
+  }, [reviewName])
+
   const formattedDate = useMemo(
     () =>
       new Date(uploadedAt).toLocaleDateString('en-US', {
@@ -124,9 +132,6 @@ export const SubmitBar = memo(function SubmitBar({
 
   return (
     <>
-      {/* React 19 natively hoists <title> to <head> — no library needed */}
-      <title>{reviewName} — Review</title>
-
       <header className="submit-bar" role="banner">
         {/* Row 1: doc name + actions */}
         <div className="submit-bar__row submit-bar__row--main">
@@ -135,6 +140,7 @@ export const SubmitBar = memo(function SubmitBar({
           </h1>
 
           <div className="submit-bar__actions">
+            <ThemeToggle />
             {!canSubmit && (
               <p id={blockingDescId} className="submit-bar__blocking-msg" role="alert">
                 <XCircle size={14} aria-hidden="true" />

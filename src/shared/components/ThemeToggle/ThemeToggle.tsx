@@ -1,0 +1,38 @@
+import { useState, useCallback } from 'react'
+import { Sun, Moon } from 'lucide-react'
+
+function getCurrentTheme(): 'light' | 'dark' {
+  return (document.documentElement.getAttribute('data-theme') as 'light' | 'dark') ?? 'light'
+}
+
+/**
+ * Toggles between light and dark theme.
+ * Writes to both the DOM attribute (instant visual change) and localStorage (persists across sessions).
+ * No React context needed — the CSS variable system handles propagation.
+ */
+export function ThemeToggle() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(getCurrentTheme)
+
+  const toggle = useCallback(() => {
+    const next = theme === 'light' ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', next)
+    localStorage.setItem('theme', next)
+    setTheme(next)
+  }, [theme])
+
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={toggle}
+      aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+    >
+      {theme === 'light' ? (
+        <Moon size={15} aria-hidden="true" />
+      ) : (
+        <Sun size={15} aria-hidden="true" />
+      )}
+    </button>
+  )
+}

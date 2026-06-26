@@ -17,8 +17,17 @@ import { getToken } from '../lib/auth'
  */
 export async function getReview(_id: string): Promise<Review> {
   void getToken() // will be used in real implementation
-  await new Promise(res => setTimeout(res, 600))
-  return mockData as Review
+  try {
+    await new Promise(res => setTimeout(res, 600))
+    return mockData as Review
+  } catch (err) {
+    throw new Error(
+      err instanceof Error
+        ? `Failed to load review: ${err.message}`
+        : 'Failed to load review. Please try again.',
+      { cause: err }
+    )
+  }
 }
 
 /**
@@ -35,6 +44,15 @@ export async function getReview(_id: string): Promise<Review> {
  * if (!res.ok) throw new Error('Failed to submit review')
  */
 export async function submitReview(_id: string): Promise<void> {
-  await new Promise(res => setTimeout(res, 800))
-  // no-op — endpoint not ready
+  try {
+    await new Promise(res => setTimeout(res, 800))
+    // no-op — endpoint not ready
+  } catch (err) {
+    throw new Error(
+      err instanceof Error
+        ? `Failed to submit review: ${err.message}`
+        : 'Failed to submit review. Please try again.',
+      { cause: err }
+    )
+  }
 }

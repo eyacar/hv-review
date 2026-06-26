@@ -38,6 +38,36 @@ body {
   display: flex;
   flex: 1;
   overflow: hidden;
+  position: relative;
+}
+
+/* Mobile: each panel takes full space, hidden/shown via tab */
+.review-layout__panel {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  width: 100%;
+}
+
+.review-layout__panel--hidden {
+  display: none;
+}
+
+/* Desktop: always show both panels side by side */
+@media (min-width: 768px) {
+  .review-layout__panel {
+    display: flex !important;
+    flex: 1;
+  }
+
+  .review-layout__panel--hidden {
+    display: flex !important;
+  }
+
+  /* Issues panel fixed width on desktop */
+  .review-layout__panel:last-child {
+    flex: 0 0 var(--sidebar-width);
+  }
 }
 
 .review-layout__error {
@@ -48,6 +78,72 @@ body {
   height: 100vh;
   gap: 12px;
   color: var(--color-text-primary);
+}
+
+/* ── Mobile Tab Bar ──────────────────────────────────────── */
+
+.mobile-tabs {
+  display: flex;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  flex-shrink: 0;
+}
+
+.mobile-tabs__tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.mobile-tabs__tab--active {
+  color: var(--color-primary);
+}
+
+.mobile-tabs__tab--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 0 0 2px 2px;
+}
+
+.mobile-tabs__badge {
+  position: absolute;
+  top: 6px;
+  right: calc(50% - 20px);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-critical);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide tab bar on desktop */
+@media (min-width: 768px) {
+  .mobile-tabs {
+    display: none;
+  }
 }
 
 /* ── Submit Bar ──────────────────────────────────────────── */
@@ -157,7 +253,6 @@ body {
 
 .document-viewer__page-wrapper {
   border-radius: var(--radius-md);
-  overflow: hidden;
   box-shadow: var(--shadow-md);
   transition:
     box-shadow var(--transition-base),
@@ -194,13 +289,19 @@ body {
 /* ── Issues Panel ────────────────────────────────────────── */
 
 .issues-panel {
-  width: var(--sidebar-width);
-  flex-shrink: 0;
-  border-left: 1px solid var(--color-border);
+  width: 100%;
   background: var(--color-surface);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .issues-panel {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    border-left: 1px solid var(--color-border);
+  }
 }
 
 .issues-panel__header {

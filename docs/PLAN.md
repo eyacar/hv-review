@@ -7,6 +7,7 @@ This document covers the architectural decisions made for the HomeVision Documen
 ## Scope
 
 **In scope:**
+
 - Review Page UI — display the document and its issues side by side
 - Issue severity logic — block submission if any critical or major issues remain
 - Minor issue handling — users can ignore them individually
@@ -14,6 +15,7 @@ This document covers the architectural decisions made for the HomeVision Documen
 - Submit button — wired to the enable/disable logic; no actual API call (endpoint not ready)
 
 **Out of scope:**
+
 - Upload Page, Processing Page, Submitted Page — owned by other engineers
 - Submit endpoint integration — explicitly excluded in the ticket
 - Backend or server of any kind — this is a pure frontend implementation
@@ -43,66 +45,66 @@ Design tokens are CSS variables defined in `src/styles/tokens.css`. The entire v
 ```css
 :root {
   /* Surfaces */
-  --color-bg:              #ffffff;
-  --color-surface:         #f8f9fa;
-  --color-surface-muted:   #f1f3f5;
-  --color-border:          #e2e8f0;
+  --color-bg: #ffffff;
+  --color-surface: #f8f9fa;
+  --color-surface-muted: #f1f3f5;
+  --color-border: #e2e8f0;
 
   /* Text */
-  --color-text-primary:    #0f172a;
-  --color-text-muted:      #64748b;
+  --color-text-primary: #0f172a;
+  --color-text-muted: #64748b;
 
   /* Brand */
-  --color-primary:         #1e40af;
-  --color-primary-hover:   #1d4ed8;
+  --color-primary: #1e40af;
+  --color-primary-hover: #1d4ed8;
 
   /* Issue severity */
-  --color-critical:        #dc2626;
-  --color-critical-bg:     #fef2f2;
-  --color-major:           #d97706;
-  --color-major-bg:        #fffbeb;
-  --color-minor:           #2563eb;
-  --color-minor-bg:        #eff6ff;
+  --color-critical: #dc2626;
+  --color-critical-bg: #fef2f2;
+  --color-major: #d97706;
+  --color-major-bg: #fffbeb;
+  --color-minor: #2563eb;
+  --color-minor-bg: #eff6ff;
 
   /* Buttons */
-  --btn-primary-bg:        var(--color-primary);
-  --btn-primary-fg:        #ffffff;
-  --btn-primary-hover:     var(--color-primary-hover);
-  --btn-secondary-bg:      transparent;
-  --btn-secondary-fg:      var(--color-text-primary);
-  --btn-secondary-border:  var(--color-border);
-  --btn-danger-bg:         var(--color-critical);
-  --btn-danger-fg:         #ffffff;
+  --btn-primary-bg: var(--color-primary);
+  --btn-primary-fg: #ffffff;
+  --btn-primary-hover: var(--color-primary-hover);
+  --btn-secondary-bg: transparent;
+  --btn-secondary-fg: var(--color-text-primary);
+  --btn-secondary-border: var(--color-border);
+  --btn-danger-bg: var(--color-critical);
+  --btn-danger-fg: #ffffff;
 
   /* Layout */
-  --sidebar-width:         360px;
-  --header-height:         56px;
+  --sidebar-width: 360px;
+  --header-height: 56px;
 
   /* Radius */
-  --radius-sm:             4px;
-  --radius-md:             8px;
-  --radius-lg:             12px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 
   /* Shadows */
-  --shadow-sm:             0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md:             0 4px 12px rgba(0,0,0,0.08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-[data-theme="dark"] {
-  --color-bg:              #0f172a;
-  --color-surface:         #1e293b;
-  --color-surface-muted:   #263448;
-  --color-border:          #334155;
+[data-theme='dark'] {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-muted: #263448;
+  --color-border: #334155;
 
-  --color-text-primary:    #f1f5f9;
-  --color-text-muted:      #94a3b8;
+  --color-text-primary: #f1f5f9;
+  --color-text-muted: #94a3b8;
 
-  --color-primary:         #3b82f6;
-  --color-primary-hover:   #60a5fa;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
 
-  --color-critical-bg:     #450a0a;
-  --color-major-bg:        #451a03;
-  --color-minor-bg:        #1e3a5f;
+  --color-critical-bg: #450a0a;
+  --color-major-bg: #451a03;
+  --color-minor-bg: #1e3a5f;
 }
 ```
 
@@ -115,6 +117,7 @@ The acceptance criteria requires the user to be able to search for text across t
 The simplest solution would be an `<iframe>` — the browser handles rendering and native search works out of the box. But it gives up all control over the viewer: no programmatic scroll to a specific page, no way to highlight pages with issues, no access to the user's scroll position.
 
 `react-pdf` renders each page as a canvas with an optional text layer as real DOM elements. This means:
+
 1. CMD+F works natively because the text is in the DOM.
 2. We can jump to a specific page programmatically when the user clicks an issue.
 3. We have full control over the UI around the document.
@@ -297,12 +300,12 @@ The review `id` comes from the URL via `useParams()`. That single value drives t
 
 ## State Management
 
-| State | Where | Why |
-|---|---|---|
+| State                              | Where       | Why                           |
+| ---------------------------------- | ----------- | ----------------------------- |
 | Review data (loading, error, data) | React Query | Server state, async lifecycle |
-| Current PDF page | Zustand | Shared between siblings |
-| Ignored minor issues | Zustand | Shared between siblings |
-| UI-only state (hover, open/close) | useState | Local, no sharing needed |
+| Current PDF page                   | Zustand     | Shared between siblings       |
+| Ignored minor issues               | Zustand     | Shared between siblings       |
+| UI-only state (hover, open/close)  | useState    | Local, no sharing needed      |
 
 ---
 
@@ -320,9 +323,12 @@ const blockingIssues = useMemo(
 
 const canSubmit = useMemo(() => blockingIssues.length === 0, [blockingIssues])
 
-const handleIgnore = useCallback((id: string) => {
-  ignoreIssue(id) // Zustand action
-}, [ignoreIssue])
+const handleIgnore = useCallback(
+  (id: string) => {
+    ignoreIssue(id) // Zustand action
+  },
+  [ignoreIssue]
+)
 ```
 
 Components that receive stable props are wrapped in `React.memo` to prevent renders triggered by unrelated state changes — particularly important for `IssueCard`, which can render up to 25 times in the list.
@@ -359,6 +365,7 @@ commit-msg → commitlint → enforces Conventional Commits
 Two pipelines:
 
 **`ci.yml`** — runs on every push and PR to `main`:
+
 1. Install dependencies
 2. Type check (`tsc --noEmit`)
 3. Lint (`eslint`)
@@ -370,6 +377,7 @@ Two pipelines:
 ### Commit Convention
 
 I use [Conventional Commits](https://www.conventionalcommits.org/):
+
 - `feat:` new functionality
 - `fix:` bug fixes
 - `chore:` config, deps, tooling
@@ -389,6 +397,7 @@ I use [Conventional Commits](https://www.conventionalcommits.org/):
 **Vitest** (native to Vite) + **React Testing Library**.
 
 Priority areas for tests:
+
 - Submission logic: given a set of issues with various severities and ignored states, can submit? (pure logic, easy to unit test)
 - IssueCard: renders severity badge correctly, ignore button works for minor issues
 - SubmitBar: disabled when blockers exist, enabled when clear
@@ -423,6 +432,6 @@ Two things stood out:
 
 **The PDF text layer.** Getting CMD+F to work natively while maintaining full control over the viewer isn't trivial. `react-pdf` renders pages to canvas, and the text layer needs to be configured specifically so the text elements exist in the DOM for the browser's native find to pick them up. Getting the text layer positioned correctly over the canvas — so selection and highlighting work — required careful CSS and an understanding of how pdfjs-dist handles page rendering internally.
 
-**Connecting issues to document pages.** The UX decision to make issues clickable — jumping to the right page in the PDF — required coordinating state between two sibling components that have no natural parent-child relationship. The Zustand store handles this cleanly, but the decision of *where* to put this logic (not in either component, not in a prop-drilled parent, but in a dedicated store slice) is the kind of architectural judgment that matters in a real codebase.
+**Connecting issues to document pages.** The UX decision to make issues clickable — jumping to the right page in the PDF — required coordinating state between two sibling components that have no natural parent-child relationship. The Zustand store handles this cleanly, but the decision of _where_ to put this logic (not in either component, not in a prop-drilled parent, but in a dedicated store slice) is the kind of architectural judgment that matters in a real codebase.
 
 **Performance: rendering 34 pages without blocking the UI.** Rendering all PDF pages at once is a non-starter — each page is a canvas element that pdfjs renders in a worker thread, and doing all 34 up front causes a noticeable load spike. The solution is lazy rendering via `IntersectionObserver`: pages are only rendered when they enter (or are about to enter) the viewport, and unloaded when they scroll far away. This keeps memory usage flat regardless of document length. The pdfjs worker itself is also configured to run off the main thread, so heavy decode operations don't block user interactions. Getting the worker path right in a Vite build (it needs to be treated as a static asset, not bundled) was one of the more finicky parts of the setup.

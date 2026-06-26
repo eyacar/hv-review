@@ -38,7 +38,8 @@ export const DocumentViewer = memo(function DocumentViewer({
     if (!el) return
     const observer = new ResizeObserver(entries => {
       const width = entries[0]?.contentRect.width
-      if (width) setContainerWidth(Math.floor(width) - 48) // subtract padding
+      // contentRect already excludes padding — cap at 700 to match max-width of document container
+      if (width) setContainerWidth(Math.min(Math.floor(width), 700))
     })
     observer.observe(el)
     return () => observer.disconnect()

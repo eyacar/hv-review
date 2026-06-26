@@ -112,7 +112,11 @@ export const DocumentViewer = memo(function DocumentViewer({
     return () => clearTimeout(timeout)
   }, [currentPage])
 
-  // Track which page is visible as the user scrolls
+  // Track which page is visible as the user scrolls.
+  // Each page wrapper gets its own IntersectionObserver scoped to the scroll container.
+  // threshold: 0.5 means the page must be at least 50% visible before it's considered "current".
+  // We skip updates while isScrollingProgrammatically is true to avoid fighting the
+  // programmatic scroll triggered by clicking an issue card.
   const handlePageRef = useCallback(
     (el: HTMLDivElement | null, pageNum: number) => {
       pageRefs.current[pageNum - 1] = el

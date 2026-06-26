@@ -4,6 +4,8 @@ import { useReview } from '../features/review/hooks/useReview'
 import { SubmitBar } from '../features/review/components/SubmitBar/SubmitBar'
 import { IssuesPanel } from '../features/review/components/IssuesPanel/IssuesPanel'
 import { DocumentViewer } from '../features/review/components/DocumentViewer/DocumentViewer'
+import { ReviewSkeleton } from '../features/review/components/ReviewSkeleton/ReviewSkeleton'
+import { ReviewError } from '../features/review/components/ReviewError/ReviewError'
 import { useReviewStore } from '../features/review/store/reviewStore'
 import { cn } from '../lib/cn'
 
@@ -16,10 +18,10 @@ export default function ReviewPage() {
   const activeTab = useReviewStore(state => state.activeMobileTab)
   const setActiveTab = useReviewStore(state => state.setActiveMobileTab)
 
-  const { data: review, isLoading, isError, error } = useReview(reviewId)
+  const { data: review, isLoading, isError, error, refetch } = useReview(reviewId)
 
-  if (isLoading) return <ReviewPageSkeleton />
-  if (isError) return <ReviewPageError message={error.message} />
+  if (isLoading) return <ReviewSkeleton />
+  if (isError) return <ReviewError message={error.message} onRetry={refetch} />
   if (!review) return null
 
   const userName = `${review.user.first_name} ${review.user.last_name}`
@@ -85,30 +87,6 @@ export default function ReviewPage() {
           )}
         </button>
       </nav>
-    </div>
-  )
-}
-
-function ReviewPageSkeleton() {
-  return (
-    <div className="review-layout" aria-busy="true" aria-label="Loading review…">
-      <div className="skeleton skeleton--header" />
-      <div className="review-layout__body">
-        <div className="skeleton skeleton--viewer" />
-        <div className="skeleton skeleton--panel" />
-      </div>
-    </div>
-  )
-}
-
-function ReviewPageError({ message }: { message: string }) {
-  return (
-    <div className="review-layout__error" role="alert">
-      <h2>Failed to load review</h2>
-      <p>{message}</p>
-      <button type="button" onClick={() => window.location.reload()}>
-        Try again
-      </button>
     </div>
   )
 }

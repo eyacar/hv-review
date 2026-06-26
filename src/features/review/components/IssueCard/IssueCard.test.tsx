@@ -105,7 +105,9 @@ describe('IssueCard — ignore behavior', () => {
 
   it('shows an ignore button for minor issues', () => {
     render(<IssueCard issue={minorIssue} isActive={false} />)
-    expect(screen.getByRole('button', { name: /ignore: formatting inconsistency/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /ignore: formatting inconsistency/i })
+    ).toBeInTheDocument()
   })
 
   it('calls ignoreIssue when Ignore is clicked', () => {

@@ -21,9 +21,15 @@ const canSubmit = (issues: Issue[], ignoredIds: Set<string>): boolean =>
 
 // ── Fixtures ──────────────────────────────────────────────────
 
-const critical: Issue = { id: 'c1', title: 'Critical issue', description: '', severity: 'critical', page: 1 }
-const major: Issue    = { id: 'm1', title: 'Major issue',    description: '', severity: 'major',    page: 2 }
-const minor: Issue    = { id: 'n1', title: 'Minor issue',    description: '', severity: 'minor',    page: 3 }
+const critical: Issue = {
+  id: 'c1',
+  title: 'Critical issue',
+  description: '',
+  severity: 'critical',
+  page: 1,
+}
+const major: Issue = { id: 'm1', title: 'Major issue', description: '', severity: 'major', page: 2 }
+const minor: Issue = { id: 'n1', title: 'Minor issue', description: '', severity: 'minor', page: 3 }
 
 // ── Tests ─────────────────────────────────────────────────────
 

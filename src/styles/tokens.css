@@ -1,0 +1,92 @@
+/* ============================================================
+   hv-review — Design Tokens
+   All visual decisions live here. Change a token, update everywhere.
+   ============================================================ */
+
+:root {
+  /* Surfaces */
+  --color-bg:             #ffffff;
+  --color-surface:        #f8fafc;
+  --color-surface-muted:  #f1f5f9;
+  --color-border:         #e2e8f0;
+
+  /* Text */
+  --color-text-primary:   #0f172a;
+  --color-text-muted:     #64748b;
+  --color-text-inverse:   #ffffff;
+
+  /* Brand */
+  --color-primary:        #1e40af;
+  --color-primary-hover:  #1d4ed8;
+
+  /* Issue severity — same across themes, only bg inverts */
+  --color-critical:       #dc2626;
+  --color-critical-bg:    #fef2f2;
+  --color-critical-border:#fecaca;
+  --color-major:          #d97706;
+  --color-major-bg:       #fffbeb;
+  --color-major-border:   #fde68a;
+  --color-minor:          #2563eb;
+  --color-minor-bg:       #eff6ff;
+  --color-minor-border:   #bfdbfe;
+
+  /* Buttons */
+  --btn-primary-bg:       var(--color-primary);
+  --btn-primary-fg:       #ffffff;
+  --btn-primary-hover:    var(--color-primary-hover);
+  --btn-secondary-bg:     transparent;
+  --btn-secondary-fg:     var(--color-text-primary);
+  --btn-secondary-border: var(--color-border);
+  --btn-danger-bg:        var(--color-critical);
+  --btn-danger-fg:        #ffffff;
+
+  /* Layout */
+  --sidebar-width:        380px;
+  --header-height:        56px;
+
+  /* Radius */
+  --radius-sm:            4px;
+  --radius-md:            8px;
+  --radius-lg:            12px;
+  --radius-xl:            16px;
+
+  /* Shadows */
+  --shadow-sm:            0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md:            0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg:            0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Typography */
+  --font-display:         'Inter', system-ui, sans-serif;
+  --font-body:            'Inter', system-ui, sans-serif;
+  --font-mono:            'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Transitions */
+  --transition-fast:      150ms ease;
+  --transition-base:      200ms ease;
+}
+
+/* ── Dark theme ─────────────────────────────────────────── */
+[data-theme='dark'] {
+  --color-bg:             #0f172a;
+  --color-surface:        #1e293b;
+  --color-surface-muted:  #263448;
+  --color-border:         #334155;
+
+  --color-text-primary:   #f1f5f9;
+  --color-text-muted:     #94a3b8;
+
+  --color-primary:        #3b82f6;
+  --color-primary-hover:  #60a5fa;
+
+  /* Severity backgrounds invert in dark mode */
+  --color-critical-bg:    #450a0a;
+  --color-critical-border:#7f1d1d;
+  --color-major-bg:       #451a03;
+  --color-major-border:   #78350f;
+  --color-minor-bg:       #1e3a5f;
+  --color-minor-border:   #1e40af;
+
+  --shadow-sm:            0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md:            0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg:            0 8px 24px rgba(0, 0, 0, 0.5);
+}

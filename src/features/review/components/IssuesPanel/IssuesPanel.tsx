@@ -5,7 +5,8 @@ import { cn } from '../../../../lib/cn'
 import type { Issue, IssueSeverity } from '../../../../api/types'
 
 interface IssuesPanelProps {
-  issues: Issue[]
+  /** Full list of issues for this review, sorted and filtered internally by severity. */
+  issues: readonly Issue[]
 }
 
 const SEVERITY_ORDER: IssueSeverity[] = ['critical', 'major', 'minor']

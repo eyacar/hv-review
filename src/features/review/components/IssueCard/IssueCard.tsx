@@ -7,9 +7,9 @@ import type { Issue } from '../../../../api/types'
 
 interface IssueCardProps {
   /** The issue to display, including severity, description, and page reference. */
-  issue: Issue
+  readonly issue: Issue
   /** Whether this card is the currently active issue (highlighted, scrolled into view). */
-  isActive: boolean
+  readonly isActive: boolean
 }
 
 /**

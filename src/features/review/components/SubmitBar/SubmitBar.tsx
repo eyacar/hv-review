@@ -64,18 +64,25 @@ function StepIndicator({ status }: { status: ReviewStatus }) {
 // ── SubmitBar ─────────────────────────────────────────────────
 
 interface SubmitBarProps {
+  /** Unique identifier for the review — used to call the submit endpoint. */
   reviewId: string
+  /** Human-readable name of the document being reviewed, shown in the header and page title. */
   reviewName: string
+  /** Document version number displayed in the metadata row. */
   version: number
+  /** Current workflow status — drives the step indicator highlight. */
   status: ReviewStatus
+  /** ISO 8601 timestamp of when the document was uploaded, formatted for display. */
   uploadedAt: string
+  /** Name of the reviewer assigned to this document. */
   userName: string
-  issues: Issue[]
+  /** Full list of issues; used to compute blocking count and disable/enable submit. */
+  issues: readonly Issue[]
 }
 
 /**
  * Header bar with:
- * - Dynamic page title via react-helmet-async (proper React way, no document.title in effects)
+ * - Dynamic page title via useEffect (document.title) — synced to reviewName
  * - Step indicator showing the full review workflow (Upload → Processing → Review → Submitted)
  * - Review metadata: version, date, assigned user — visible on the second row
  * - Submit button — blocked when critical/major issues remain

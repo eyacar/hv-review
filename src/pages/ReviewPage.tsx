@@ -1,21 +1,20 @@
-import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { FileText, AlertCircle } from 'lucide-react'
 import { useReview } from '../features/review/hooks/useReview'
 import { SubmitBar } from '../features/review/components/SubmitBar/SubmitBar'
 import { IssuesPanel } from '../features/review/components/IssuesPanel/IssuesPanel'
 import { DocumentViewer } from '../features/review/components/DocumentViewer/DocumentViewer'
+import { useReviewStore } from '../features/review/store/reviewStore'
 import { cn } from '../lib/cn'
 
 // Fallback ID for development — matches the mock data
 const DEV_REVIEW_ID = 'souj5sd12c8a3f'
 
-type MobileTab = 'document' | 'issues'
-
 export default function ReviewPage() {
   const { id } = useParams<{ id: string }>()
   const reviewId = id ?? DEV_REVIEW_ID
-  const [activeTab, setActiveTab] = useState<MobileTab>('document')
+  const activeTab = useReviewStore(state => state.activeMobileTab)
+  const setActiveTab = useReviewStore(state => state.setActiveMobileTab)
 
   const { data: review, isLoading, isError, error } = useReview(reviewId)
 

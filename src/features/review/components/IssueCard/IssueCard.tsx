@@ -17,12 +17,15 @@ interface IssueCardProps {
  * - Wrapped in React.memo — up to 25 cards render in the list
  */
 export const IssueCard = memo(function IssueCard({ issue, isActive }: IssueCardProps) {
-  const { setCurrentPage, ignoreIssue, unignoreIssue, isIgnored } = useReviewStore()
+  const { setCurrentPage, ignoreIssue, unignoreIssue, isIgnored, setActiveMobileTab } =
+    useReviewStore()
   const ignored = isIgnored(issue.id)
 
   const handleJumpToPage = useCallback(() => {
     setCurrentPage(issue.page)
-  }, [issue.page, setCurrentPage])
+    // On mobile, switch to the document panel so the user can see the PDF page
+    setActiveMobileTab('document')
+  }, [issue.page, setCurrentPage, setActiveMobileTab])
 
   const handleToggleIgnore = useCallback(
     (e: React.MouseEvent) => {

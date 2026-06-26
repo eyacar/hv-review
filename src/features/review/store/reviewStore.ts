@@ -10,22 +10,31 @@ import { create } from 'zustand'
  * What lives here:
  * - currentPage: syncs the PDF viewer with the issues panel
  * - ignoredIssues: tracks which minor issues the user dismissed
+ * - activeMobileTab: controls which panel is visible on mobile.
+ *   Lives here (not in ReviewPage) so IssueCard can switch to 'document'
+ *   when a user taps an issue — without prop drilling.
  */
+
+export type MobileTab = 'document' | 'issues'
 
 interface ReviewStore {
   currentPage: number
   ignoredIssues: Set<string>
+  activeMobileTab: MobileTab
   setCurrentPage: (page: number) => void
   ignoreIssue: (id: string) => void
   unignoreIssue: (id: string) => void
   isIgnored: (id: string) => boolean
+  setActiveMobileTab: (tab: MobileTab) => void
 }
 
 export const useReviewStore = create<ReviewStore>((set, get) => ({
   currentPage: 1,
   ignoredIssues: new Set(),
+  activeMobileTab: 'document',
 
   setCurrentPage: (page: number) => set({ currentPage: page }),
+  setActiveMobileTab: (tab: MobileTab) => set({ activeMobileTab: tab }),
 
   ignoreIssue: (id: string) =>
     set(state => ({

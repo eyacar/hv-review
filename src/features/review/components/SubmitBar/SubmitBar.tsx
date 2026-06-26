@@ -124,11 +124,11 @@ export const SubmitBar = memo(function SubmitBar({
           {!canSubmit && (
             <Link
               to="/upload"
-              className="btn btn--secondary"
+              className="btn btn--secondary btn--icon-mobile"
               aria-label="Upload a new document version"
             >
               <Upload size={14} aria-hidden="true" />
-              Upload new version
+              <span>Upload new version</span>
             </Link>
           )}
 

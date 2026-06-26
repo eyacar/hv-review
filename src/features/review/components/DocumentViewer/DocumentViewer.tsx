@@ -16,7 +16,9 @@ const ZOOM_STEP = 0.25
 const ZOOM_DEFAULT = 1.0
 
 interface DocumentViewerProps {
+  /** URL of the PDF to render — can be a local path (dev) or CDN URL (production). */
   url: string
+  /** Total number of pages in the document, used to render page wrappers and clamp navigation. */
   totalPages: number
 }
 

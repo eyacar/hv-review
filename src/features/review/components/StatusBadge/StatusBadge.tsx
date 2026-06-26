@@ -4,7 +4,9 @@ import { cn } from '../../../../lib/cn'
 import type { IssueSeverity } from '../../../../api/types'
 
 interface StatusBadgeProps {
+  /** Issue severity level — determines color, icon, and label. */
   severity: IssueSeverity
+  /** Optional extra class for positioning overrides from parent layouts. */
   className?: string
 }
 

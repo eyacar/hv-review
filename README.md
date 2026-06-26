@@ -1,6 +1,6 @@
 # hv-review — HomeVision Document Review
 
-> **Run it:** `npm install && npm run dev` → open [localhost:5173](http://localhost:5173) → click **Open demo review**
+> **Run it:** `npm install && npm run dev` → open [localhost:5173](http://localhost:5173) → click **Open demo review** _(dev server must be running — the demo PDF is served locally)_
 
 A take-home project implementing the Document Review page for HomeVision's mortgage document workflow. Reviewers can inspect AI-identified issues in uploaded PDFs, navigate between pages, filter issues by severity, and submit once all critical and major issues are resolved.
 

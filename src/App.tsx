@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 
 // Lazy load all pages — each route only loads what it needs
+const HomePage = lazy(() => import('./pages/HomePage'))
 const ReviewPage = lazy(() => import('./pages/ReviewPage'))
 const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'))
 
@@ -39,11 +40,10 @@ const router = createBrowserRouter([
     ),
   },
   {
-    // Default redirect to the mock review for development
     path: '/',
     element: (
       <Suspense fallback={<PageLoader />}>
-        <ReviewPage />
+        <HomePage />
       </Suspense>
     ),
   },

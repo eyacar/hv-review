@@ -9,12 +9,8 @@ import { ReviewError } from '../features/review/components/ReviewError/ReviewErr
 import { useReviewStore } from '../features/review/store/reviewStore'
 import { cn } from '../lib/cn'
 
-// Fallback ID for development — matches the mock data
-const DEV_REVIEW_ID = 'souj5sd12c8a3f'
-
 export default function ReviewPage() {
-  const { id } = useParams<{ id: string }>()
-  const reviewId = id ?? DEV_REVIEW_ID
+  const { id: reviewId = '' } = useParams<{ id: string }>()
   const activeTab = useReviewStore(state => state.activeMobileTab)
   const setActiveTab = useReviewStore(state => state.setActiveMobileTab)
 

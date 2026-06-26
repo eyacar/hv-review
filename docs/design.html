@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hv-review — UX Design Sketches</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 40px 24px;
+    }
+    .page { max-width: 960px; margin: 0 auto; }
+
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { color: #666; font-size: 13px; margin-bottom: 40px; }
+
+    h2 { font-size: 14px; font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.06em; color: #444; }
+
+    .section { margin-bottom: 56px; }
+
+    /* Wireframe boxes */
+    .wireframe { background: #fff; border: 1.5px solid #d0d0d0; border-radius: 8px; overflow: hidden; }
+    .wireframe-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+
+    /* Desktop wireframe */
+    .desktop-frame { width: 100%; }
+    .wf-header {
+      background: #f0f0f0;
+      border-bottom: 1.5px solid #d0d0d0;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .wf-header-row1 { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .wf-title-block { background: #d8d8d8; height: 14px; width: 220px; border-radius: 3px; }
+    .wf-actions { display: flex; gap: 8px; align-items: center; }
+    .wf-btn { background: #c8c8c8; height: 26px; border-radius: 4px; }
+    .wf-btn-primary { width: 90px; background: #a0b4d0; }
+    .wf-btn-secondary { width: 110px; }
+    .wf-btn-icon { width: 28px; }
+    .wf-header-row2 { display: flex; align-items: center; justify-content: space-between; }
+    .wf-steps { display: flex; align-items: center; gap: 6px; }
+    .wf-step { display: flex; align-items: center; gap: 5px; }
+    .wf-dot { width: 14px; height: 14px; border-radius: 50%; background: #a0b4d0; flex-shrink: 0; }
+    .wf-dot--done { background: #a0b4d0; }
+    .wf-dot--pending { background: #d8d8d8; border: 1.5px solid #bbb; }
+    .wf-dot--current { background: #a0b4d0; box-shadow: 0 0 0 3px #c8d8ec; }
+    .wf-step-label { font-size: 10px; color: #888; }
+    .wf-connector { width: 18px; height: 2px; background: #d0d0d0; }
+    .wf-connector--filled { background: #a0b4d0; }
+    .wf-meta { display: flex; gap: 6px; font-size: 10px; color: #aaa; }
+
+    .wf-toolbar {
+      background: #f7f7f7;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 6px 0;
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+    .wf-tool-btn { width: 26px; height: 26px; background: #e0e0e0; border-radius: 3px; }
+    .wf-tool-text { width: 42px; height: 26px; background: #e8e8e8; border-radius: 3px; font-size: 10px; color: #888; display: flex; align-items: center; justify-content: center; }
+    .wf-tool-divider { width: 1px; background: #d0d0d0; margin: 3px 4px; }
+
+    .wf-body { display: flex; height: 340px; }
+    .wf-pdf-area { flex: 1; background: #e8e8e8; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .wf-pdf-page { width: 58%; background: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 12px; display: flex; flex-direction: column; gap: 7px; }
+    .wf-pdf-line { height: 6px; background: #e8e8e8; border-radius: 2px; }
+    .wf-pdf-line--short { width: 60%; }
+    .wf-pdf-line--med { width: 80%; }
+    .wf-pdf-line--full { width: 100%; }
+    .wf-pdf-line--heading { height: 10px; width: 50%; background: #d8d8d8; }
+    .wf-pdf-active-ring { position: absolute; inset: 0; border: 2px solid transparent; pointer-events: none; }
+
+    .wf-issues-panel { width: 280px; border-left: 1.5px solid #d0d0d0; background: #fafafa; display: flex; flex-direction: column; }
+    .wf-panel-header { padding: 10px 12px 6px; border-bottom: 1px solid #e8e8e8; display: flex; flex-direction: column; gap: 6px; }
+    .wf-panel-title-row { display: flex; justify-content: space-between; align-items: center; }
+    .wf-panel-title { font-size: 11px; font-weight: 700; color: #555; }
+    .wf-count-badge { width: 22px; height: 16px; background: #e0e0e0; border-radius: 999px; font-size: 9px; color: #888; display: flex; align-items: center; justify-content: center; }
+    .wf-filter-row { display: flex; gap: 4px; }
+    .wf-filter-chip { padding: 2px 8px; border-radius: 999px; border: 1px solid #d8d8d8; font-size: 9px; color: #999; background: transparent; }
+    .wf-filter-chip--active { background: #e8e8e8; color: #555; border-color: transparent; font-weight: 600; }
+
+    .wf-issues-list { flex: 1; overflow: hidden; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .wf-issue-group-label { font-size: 9px; font-weight: 700; color: #aaa; text-transform: uppercase; padding: 4px 4px 2px; letter-spacing: 0.05em; }
+    .wf-issue-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 4px; border-left: 3px solid #d8d8d8; padding: 6px 8px; display: flex; flex-direction: column; gap: 3px; }
+    .wf-issue-card--critical { border-left-color: #e88; }
+    .wf-issue-card--major { border-left-color: #e8b870; }
+    .wf-issue-card--minor { border-left-color: #88b0e8; }
+    .wf-issue-card--active { box-shadow: 0 0 0 1.5px #a0b4d0; }
+    .wf-issue-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; }
+    .wf-issue-badge { font-size: 8px; padding: 1px 5px; border-radius: 3px; font-weight: 700; }
+    .wf-issue-badge--critical { background: #fdddd8; color: #c44; }
+    .wf-issue-badge--major { background: #fdecc8; color: #b87820; }
+    .wf-issue-badge--minor { background: #ddeeff; color: #446; }
+    .wf-issue-page { font-size: 8px; color: #aaa; }
+    .wf-issue-title { font-size: 9px; font-weight: 600; color: #444; }
+    .wf-issue-desc { height: 5px; background: #f0f0f0; border-radius: 2px; width: 90%; }
+
+    /* Annotations */
+    .annotations { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .annotation { display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: #555; }
+    .annotation-num { width: 18px; height: 18px; border-radius: 50%; background: #1a1a1a; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+    /* Mobile wireframe */
+    .mobile-frames { display: flex; gap: 24px; flex-wrap: wrap; }
+    .mobile-frame-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .mobile-frame { width: 200px; border: 2px solid #1a1a1a; border-radius: 20px; overflow: hidden; background: #fff; padding: 8px 0 0; }
+    .mobile-notch { width: 60px; height: 6px; background: #1a1a1a; border-radius: 3px; margin: 0 auto 8px; }
+    .wf-mobile-header { background: #f0f0f0; border-bottom: 1px solid #d8d8d8; padding: 8px 10px 6px; }
+    .wf-mobile-title { height: 10px; background: #c8c8c8; border-radius: 2px; width: 75%; margin-bottom: 5px; }
+    .wf-mobile-steps { display: flex; align-items: center; gap: 3px; }
+    .wf-mobile-dot { width: 10px; height: 10px; border-radius: 50%; background: #d8d8d8; flex-shrink: 0; }
+    .wf-mobile-dot--done { background: #a0b4d0; }
+    .wf-mobile-dot--current { background: #a0b4d0; box-shadow: 0 0 0 2px #c8d8ec; }
+    .wf-mobile-connector { width: 10px; height: 1.5px; background: #d0d0d0; }
+    .wf-mobile-connector--filled { background: #a0b4d0; }
+    .wf-mobile-current-label { font-size: 8px; color: #a0b4d0; font-weight: 700; }
+    .wf-mobile-actions { display: flex; gap: 4px; justify-content: flex-end; align-items: center; margin-top: 4px; }
+    .wf-mobile-btn { height: 20px; border-radius: 3px; background: #a0b4d0; }
+    .wf-mobile-btn-icon { width: 20px; background: #e0e0e0; }
+
+    .wf-mobile-toolbar { background: #f7f7f7; border-bottom: 1px solid #e8e8e8; padding: 4px 0; display: flex; justify-content: center; gap: 3px; }
+    .wf-mobile-tool { width: 22px; height: 18px; background: #e0e0e0; border-radius: 2px; }
+    .wf-mobile-tool-text { width: 32px; height: 18px; background: #e8e8e8; border-radius: 2px; font-size: 8px; color: #888; display: flex; align-items: center; justify-content: center; }
+
+    .wf-mobile-body { height: 180px; background: #e8e8e8; display: flex; align-items: center; justify-content: center; padding: 8px; }
+    .wf-mobile-pdf { width: 100%; height: 100%; background: #fff; border-radius: 3px; border: 1px solid #ccc; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .wf-mobile-pdf-line { height: 4px; background: #ebebeb; border-radius: 1px; }
+
+    .wf-mobile-issues-body { height: 180px; background: #fafafa; padding: 6px; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+    .wf-mobile-issue { background: #fff; border: 1px solid #ebebeb; border-left: 2px solid #e88; border-radius: 3px; padding: 5px 6px; display: flex; flex-direction: column; gap: 2px; }
+    .wf-mobile-issue--major { border-left-color: #e8b870; }
+    .wf-mobile-issue--minor { border-left-color: #88b0e8; }
+    .wf-mobile-issue-badge { height: 6px; width: 30px; background: #fdddd8; border-radius: 2px; }
+    .wf-mobile-issue-badge--major { background: #fdecc8; }
+    .wf-mobile-issue-badge--minor { background: #ddeeff; }
+    .wf-mobile-issue-title { height: 6px; background: #e8e8e8; border-radius: 2px; width: 85%; }
+    .wf-mobile-issue-desc { height: 4px; background: #f0f0f0; border-radius: 2px; width: 70%; }
+
+    .wf-mobile-tabs { display: flex; border-top: 1.5px solid #d8d8d8; background: #f5f5f5; }
+    .wf-mobile-tab { flex: 1; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .wf-mobile-tab-icon { width: 14px; height: 14px; background: #d0d0d0; border-radius: 2px; }
+    .wf-mobile-tab-icon--active { background: #a0b4d0; }
+    .wf-mobile-tab-label { font-size: 7px; color: #aaa; }
+    .wf-mobile-tab-label--active { color: #a0b4d0; font-weight: 700; }
+    .wf-mobile-badge { position: relative; }
+    .wf-mobile-badge-dot { position: absolute; top: -3px; right: -8px; width: 10px; height: 10px; background: #e88; border-radius: 50%; font-size: 6px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .mobile-frame-label { font-size: 11px; font-weight: 600; color: #666; text-align: center; }
+
+    /* Decision table */
+    .decision-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .decision-table th { background: #f0f0f0; padding: 8px 12px; text-align: left; font-weight: 700; font-size: 11px; color: #555; border: 1px solid #e0e0e0; }
+    .decision-table td { padding: 8px 12px; border: 1px solid #e8e8e8; color: #444; vertical-align: top; }
+    .decision-table tr:nth-child(even) td { background: #fafafa; }
+
+    .check { color: #2a9; font-weight: 700; }
+    .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+    .tag--blue { background: #ddeeff; color: #336; }
+    .tag--green { background: #ddffee; color: #264; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <h1>hv-review — UX Design Sketches</h1>
+  <p class="subtitle">HomeVision Document Review · Initial layout exploration and key design decisions</p>
+
+  <!-- DESKTOP -->
+  <div class="section">
+    <h2>Desktop layout</h2>
+    <p class="wireframe-label">Split panel — document viewer (left) + issues sidebar (right)</p>
+
+    <div class="wireframe desktop-frame">
+      <!-- Header -->
+      <div class="wf-header">
+        <div class="wf-header-row1">
+          <div class="wf-title-block"></div>
+          <div class="wf-actions">
+            <div class="wf-btn wf-btn-icon"></div>
+            <div class="wf-btn wf-btn-secondary" style="display:flex;align-items:center;gap:4px;padding:0 8px;">
+              <div style="width:8px;height:8px;background:#aaa;border-radius:1px;"></div>
+              <div style="width:60px;height:6px;background:#ccc;border-radius:2px;"></div>
+            </div>
+            <div class="wf-btn wf-btn-primary"></div>
+          </div>
+        </div>
+        <div class="wf-header-row2">
+          <div class="wf-steps">
+            <div class="wf-step">
+              <div class="wf-dot wf-dot--done"></div>
+              <span class="wf-step-label">Upload</span>
+            </div>
+            <div class="wf-connector wf-connector--filled"></div>
+            <div class="wf-step">
+              <div class="wf-dot wf-dot--done"></div>
+              <span class="wf-step-label">Processing</span>
+            </div>
+            <div class="wf-connector wf-connector--filled"></div>
+            <div class="wf-step">
+              <div class="wf-dot wf-dot--current"></div>
+              <span class="wf-step-label" style="color:#a0b4d0;font-weight:700;">Review</span>
+            </div>
+            <div class="wf-connector"></div>
+            <div class="wf-step">
+              <div class="wf-dot wf-dot--pending"></div>
+              <span class="wf-step-label">Submitted</span>
+            </div>
+          </div>
+          <div class="wf-meta">
+            <span>v2</span><span>·</span><span>Mar 20, 2025</span><span>·</span><span>Jane Cooper</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="wf-toolbar">
+        <div class="wf-tool-btn"></div>
+        <div class="wf-tool-text">100%</div>
+        <div class="wf-tool-btn"></div>
+        <div class="wf-tool-divider"></div>
+        <div class="wf-tool-btn"></div>
+        <div class="wf-tool-text">2/34</div>
+        <div class="wf-tool-btn"></div>
+      </div>
+
+      <!-- Body -->
+      <div class="wf-body">
+        <!-- PDF area -->
+        <div class="wf-pdf-area">
+          <div class="wf-pdf-page">
+            <div class="wf-pdf-line wf-pdf-line--heading"></div>
+            <div class="wf-pdf-line wf-pdf-line--full"></div>
+            <div class="wf-pdf-line wf-pdf-line--full"></div>
+            <div class="wf-pdf-line wf-pdf-line--med"></div>
+            <div style="height:8px"></div>
+            <div class="wf-pdf-line wf-pdf-line--heading"></div>
+            <div class="wf-pdf-line wf-pdf-line--full"></div>
+            <div class="wf-pdf-line wf-pdf-line--full"></div>
+            <div class="wf-pdf-line wf-pdf-line--short"></div>
+            <div style="height:8px"></div>
+            <div class="wf-pdf-line wf-pdf-line--heading"></div>
+            <div class="wf-pdf-line wf-pdf-line--full"></div>
+            <div class="wf-pdf-line wf-pdf-line--med"></div>
+          </div>
+        </div>
+
+        <!-- Issues panel -->
+        <div class="wf-issues-panel">
+          <div class="wf-panel-header">
+            <div class="wf-panel-title-row">
+              <span class="wf-panel-title">Issues</span>
+              <div class="wf-count-badge">25</div>
+            </div>
+            <div class="wf-filter-row">
+              <div class="wf-filter-chip wf-filter-chip--active">All 25</div>
+              <div class="wf-filter-chip">Critical 4</div>
+              <div class="wf-filter-chip">Major 8</div>
+              <div class="wf-filter-chip">Minor 13</div>
+            </div>
+          </div>
+          <div class="wf-issues-list">
+            <div class="wf-issue-group-label">Critical</div>
+            <div class="wf-issue-card wf-issue-card--critical wf-issue-card--active">
+              <div class="wf-issue-top">
+                <div class="wf-issue-badge wf-issue-badge--critical">Critical</div>
+                <div class="wf-issue-page">Page 3</div>
+              </div>
+              <div class="wf-issue-title">Missing appraisal signature</div>
+              <div class="wf-issue-desc"></div>
+            </div>
+            <div class="wf-issue-card wf-issue-card--critical">
+              <div class="wf-issue-top">
+                <div class="wf-issue-badge wf-issue-badge--critical">Critical</div>
+                <div class="wf-issue-page">Page 1</div>
+              </div>
+              <div class="wf-issue-title">Effective date mismatch</div>
+              <div class="wf-issue-desc"></div>
+            </div>
+            <div class="wf-issue-group-label" style="margin-top:4px">Major</div>
+            <div class="wf-issue-card wf-issue-card--major">
+              <div class="wf-issue-top">
+                <div class="wf-issue-badge wf-issue-badge--major">Major</div>
+                <div class="wf-issue-page">Page 28</div>
+              </div>
+              <div class="wf-issue-title">GLA calculation discrepancy</div>
+              <div class="wf-issue-desc"></div>
+            </div>
+            <div class="wf-issue-group-label" style="margin-top:4px">Minor</div>
+            <div class="wf-issue-card wf-issue-card--minor">
+              <div class="wf-issue-top">
+                <div class="wf-issue-badge wf-issue-badge--minor">Minor</div>
+                <div class="wf-issue-page">Page 5</div>
+              </div>
+              <div class="wf-issue-title">Formatting inconsistency</div>
+              <div class="wf-issue-desc"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotations">
+      <div class="annotation">
+        <div class="annotation-num">1</div>
+        <span><strong>Two-row header</strong> — row 1 has doc name + actions (submit, upload new version), row 2 has step indicator + metadata. Keeps the primary action visible without crowding the title.</span>
+      </div>
+      <div class="annotation">
+        <div class="annotation-num">2</div>
+        <span><strong>Step indicator</strong> shows Upload → Processing → Review → Submitted. Gives users orientation — they know where they are and what comes next. Derived from the <code>status</code> field, not hard-coded.</span>
+      </div>
+      <div class="annotation">
+        <div class="annotation-num">3</div>
+        <span><strong>Toolbar above the scroll area</strong> — zoom + pagination controls sit between the header and the PDF, never floating over content. Avoids z-index conflicts and keeps the reading area unobstructed.</span>
+      </div>
+      <div class="annotation">
+        <div class="annotation-num">4</div>
+        <span><strong>Issues panel fixed width (380px)</strong> — wide enough to read descriptions without wrapping, narrow enough to leave substantial space for the document. Filter chips reduce need to scroll the list.</span>
+      </div>
+      <div class="annotation">
+        <div class="annotation-num">5</div>
+        <span><strong>Active page ring</strong> — the current page gets a blue outline. Clicking an issue navigates the PDF to that page and highlights it, creating a direct connection between the issue list and the document.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE -->
+  <div class="section">
+    <h2>Mobile layout</h2>
+    <p class="wireframe-label" style="margin-bottom:16px">Tab bar approach — Document and Issues panels are exclusive on small screens</p>
+
+    <div class="mobile-frames">
+      <!-- Document tab -->
+      <div class="mobile-frame-wrap">
+        <div class="mobile-frame">
+          <div class="mobile-notch"></div>
+          <div class="wf-mobile-header">
+            <div class="wf-mobile-title"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="wf-mobile-steps">
+                <div class="wf-mobile-dot wf-mobile-dot--done"></div>
+                <div class="wf-mobile-connector wf-mobile-connector--filled"></div>
+                <div class="wf-mobile-dot wf-mobile-dot--done"></div>
+                <div class="wf-mobile-connector wf-mobile-connector--filled"></div>
+                <div class="wf-mobile-dot wf-mobile-dot--current"></div>
+                <div style="margin-left:5px;" class="wf-mobile-current-label">Review</div>
+                <div class="wf-mobile-connector"></div>
+                <div class="wf-mobile-dot"></div>
+              </div>
+              <div class="wf-mobile-actions">
+                <div class="wf-mobile-btn wf-mobile-btn-icon"></div>
+                <div class="wf-mobile-btn" style="width:44px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-mobile-toolbar">
+            <div class="wf-mobile-tool"></div>
+            <div class="wf-mobile-tool-text">100%</div>
+            <div class="wf-mobile-tool"></div>
+            <div style="width:1px;background:#d8d8d8;margin:2px 2px;"></div>
+            <div class="wf-mobile-tool"></div>
+            <div class="wf-mobile-tool-text">2/34</div>
+            <div class="wf-mobile-tool"></div>
+          </div>
+          <div class="wf-mobile-body">
+            <div class="wf-mobile-pdf">
+              <div class="wf-mobile-pdf-line" style="width:50%;background:#d8d8d8;height:6px;"></div>
+              <div class="wf-mobile-pdf-line" style="width:100%"></div>
+              <div class="wf-mobile-pdf-line" style="width:95%"></div>
+              <div class="wf-mobile-pdf-line" style="width:80%"></div>
+              <div style="height:6px"></div>
+              <div class="wf-mobile-pdf-line" style="width:50%;background:#d8d8d8;height:6px;"></div>
+              <div class="wf-mobile-pdf-line" style="width:100%"></div>
+              <div class="wf-mobile-pdf-line" style="width:90%"></div>
+              <div class="wf-mobile-pdf-line" style="width:70%"></div>
+            </div>
+          </div>
+          <div class="wf-mobile-tabs">
+            <div class="wf-mobile-tab">
+              <div class="wf-mobile-tab-icon wf-mobile-tab-icon--active"></div>
+              <div class="wf-mobile-tab-label wf-mobile-tab-label--active">Document</div>
+            </div>
+            <div class="wf-mobile-tab">
+              <div style="position:relative;display:inline-block;">
+                <div class="wf-mobile-tab-icon"></div>
+                <div class="wf-mobile-badge-dot">12</div>
+              </div>
+              <div class="wf-mobile-tab-label">Issues</div>
+            </div>
+          </div>
+        </div>
+        <div class="mobile-frame-label">Document tab</div>
+      </div>
+
+      <!-- Issues tab -->
+      <div class="mobile-frame-wrap">
+        <div class="mobile-frame">
+          <div class="mobile-notch"></div>
+          <div class="wf-mobile-header">
+            <div class="wf-mobile-title"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="wf-mobile-steps">
+                <div class="wf-mobile-dot wf-mobile-dot--done"></div>
+                <div class="wf-mobile-connector wf-mobile-connector--filled"></div>
+                <div class="wf-mobile-dot wf-mobile-dot--done"></div>
+                <div class="wf-mobile-connector wf-mobile-connector--filled"></div>
+                <div class="wf-mobile-dot wf-mobile-dot--current"></div>
+                <div style="margin-left:5px;" class="wf-mobile-current-label">Review</div>
+                <div class="wf-mobile-connector"></div>
+                <div class="wf-mobile-dot"></div>
+              </div>
+              <div class="wf-mobile-actions">
+                <div class="wf-mobile-btn wf-mobile-btn-icon"></div>
+                <div class="wf-mobile-btn" style="width:44px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-mobile-issues-body">
+            <div style="display:flex;gap:3px;margin-bottom:4px;">
+              <div class="wf-filter-chip wf-filter-chip--active" style="font-size:8px;padding:1px 6px;">All 25</div>
+              <div class="wf-filter-chip" style="font-size:8px;padding:1px 6px;">Critical 4</div>
+              <div class="wf-filter-chip" style="font-size:8px;padding:1px 6px;">Major 8</div>
+            </div>
+            <div class="wf-mobile-issue">
+              <div class="wf-mobile-issue-badge"></div>
+              <div class="wf-mobile-issue-title"></div>
+              <div class="wf-mobile-issue-desc"></div>
+            </div>
+            <div class="wf-mobile-issue">
+              <div class="wf-mobile-issue-badge"></div>
+              <div class="wf-mobile-issue-title"></div>
+              <div class="wf-mobile-issue-desc"></div>
+            </div>
+            <div class="wf-mobile-issue wf-mobile-issue--major">
+              <div class="wf-mobile-issue-badge wf-mobile-issue-badge--major"></div>
+              <div class="wf-mobile-issue-title"></div>
+              <div class="wf-mobile-issue-desc"></div>
+            </div>
+            <div class="wf-mobile-issue wf-mobile-issue--minor">
+              <div class="wf-mobile-issue-badge wf-mobile-issue-badge--minor"></div>
+              <div class="wf-mobile-issue-title"></div>
+              <div class="wf-mobile-issue-desc"></div>
+            </div>
+          </div>
+          <div class="wf-mobile-tabs">
+            <div class="wf-mobile-tab">
+              <div class="wf-mobile-tab-icon"></div>
+              <div class="wf-mobile-tab-label">Document</div>
+            </div>
+            <div class="wf-mobile-tab">
+              <div style="position:relative;display:inline-block;">
+                <div class="wf-mobile-tab-icon wf-mobile-tab-icon--active"></div>
+                <div class="wf-mobile-badge-dot">12</div>
+              </div>
+              <div class="wf-mobile-tab-label wf-mobile-tab-label--active">Issues</div>
+            </div>
+          </div>
+        </div>
+        <div class="mobile-frame-label">Issues tab</div>
+      </div>
+
+      <!-- Auto-switch -->
+      <div class="mobile-frame-wrap">
+        <div class="mobile-frame">
+          <div class="mobile-notch"></div>
+          <div class="wf-mobile-header">
+            <div class="wf-mobile-title"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="wf-mobile-steps">
+                <div class="wf-mobile-dot wf-mobile-dot--done"></div>
+                <div class="wf-mobile-connector wf-mobile-connector--filled"></div>
+                <div class="wf-mobile-dot wf-mobile-dot--done"></div>
+                <div class="wf-mobile-connector wf-mobile-connector--filled"></div>
+                <div class="wf-mobile-dot wf-mobile-dot--current"></div>
+                <div style="margin-left:5px;" class="wf-mobile-current-label">Review</div>
+              </div>
+              <div class="wf-mobile-actions">
+                <div class="wf-mobile-btn wf-mobile-btn-icon"></div>
+                <div class="wf-mobile-btn" style="width:44px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-mobile-toolbar">
+            <div class="wf-mobile-tool"></div>
+            <div class="wf-mobile-tool-text">100%</div>
+            <div class="wf-mobile-tool"></div>
+            <div style="width:1px;background:#d8d8d8;margin:2px 2px;"></div>
+            <div class="wf-mobile-tool"></div>
+            <div class="wf-mobile-tool-text" style="color:#a0b4d0;font-weight:700;">3/34</div>
+            <div class="wf-mobile-tool"></div>
+          </div>
+          <div class="wf-mobile-body">
+            <div class="wf-mobile-pdf">
+              <div style="border:1.5px solid #a0b4d0;border-radius:3px;padding:6px;display:flex;flex-direction:column;gap:4px;height:100%">
+                <div class="wf-mobile-pdf-line" style="width:50%;background:#d8d8d8;height:6px;"></div>
+                <div class="wf-mobile-pdf-line" style="width:100%"></div>
+                <div class="wf-mobile-pdf-line" style="width:90%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-mobile-tabs">
+            <div class="wf-mobile-tab">
+              <div class="wf-mobile-tab-icon wf-mobile-tab-icon--active"></div>
+              <div class="wf-mobile-tab-label wf-mobile-tab-label--active">Document</div>
+            </div>
+            <div class="wf-mobile-tab">
+              <div style="position:relative;display:inline-block;">
+                <div class="wf-mobile-tab-icon"></div>
+                <div class="wf-mobile-badge-dot">12</div>
+              </div>
+              <div class="wf-mobile-tab-label">Issues</div>
+            </div>
+          </div>
+        </div>
+        <div class="mobile-frame-label">After tapping an issue →<br>auto-switches to Document</div>
+      </div>
+    </div>
+
+    <div class="annotations" style="margin-top:16px">
+      <div class="annotation">
+        <div class="annotation-num">A</div>
+        <span><strong>Tab bar at bottom</strong> — not a top tab pattern. iOS and Android both use bottom navigation for primary switching. The badge on Issues communicates blocking count without the user needing to switch tabs.</span>
+      </div>
+      <div class="annotation">
+        <div class="annotation-num">B</div>
+        <span><strong>Auto-switch on issue tap</strong> — tapping an issue card switches to Document tab AND scrolls to that page. State lives in Zustand so IssueCard can trigger it without prop drilling through IssuesPanel.</span>
+      </div>
+      <div class="annotation">
+        <div class="annotation-num">C</div>
+        <span><strong>Step indicator — mobile</strong> — all step labels are hidden except the current step. Four dots with one visible label gives orientation without wrapping. Connectors shrink from 24px to 12px.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESIGN DECISIONS -->
+  <div class="section">
+    <h2>Key design decisions</h2>
+    <table class="decision-table">
+      <thead>
+        <tr>
+          <th>Decision</th>
+          <th>Chosen approach</th>
+          <th>Alternatives considered</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>PDF rendering</td>
+          <td><span class="tag tag--green">react-pdf + text layer</span></td>
+          <td>&lt;iframe&gt;, pdf.js directly</td>
+          <td>Text layer = native CMD+F. iframe gives up all programmatic control (page scroll, active highlight).</td>
+        </tr>
+        <tr>
+          <td>PDF text search</td>
+          <td><span class="tag tag--green">Browser native CMD+F</span></td>
+          <td>Custom search UI</td>
+          <td>Native search is instant, keyboard-accessible, and users already know it. Custom search adds complexity for no gain.</td>
+        </tr>
+        <tr>
+          <td>Shared state</td>
+          <td><span class="tag tag--green">Zustand store</span></td>
+          <td>React Context, prop drilling</td>
+          <td>Viewer and issues panel are siblings. Zustand avoids lifting state and threading props through intermediaries.</td>
+        </tr>
+        <tr>
+          <td>Mobile layout</td>
+          <td><span class="tag tag--green">Tab bar (bottom)</span></td>
+          <td>Drawer, split at 50/50, top tabs</td>
+          <td>On 375px width neither panel has enough space side-by-side. Bottom tabs follow native mobile conventions.</td>
+        </tr>
+        <tr>
+          <td>Submission blocking</td>
+          <td><span class="tag tag--green">aria-disabled + aria-describedby</span></td>
+          <td>HTML disabled attribute</td>
+          <td><code>disabled</code> removes the button from keyboard navigation. <code>aria-disabled</code> keeps it focusable so screen readers can read why it's blocked.</td>
+        </tr>
+        <tr>
+          <td>Issue severity color</td>
+          <td><span class="tag tag--green">Color + icon + text label</span></td>
+          <td>Color only</td>
+          <td>WCAG 1.4.1: information cannot be conveyed by color alone. Icon + text label ensures it works for color-blind users.</td>
+        </tr>
+        <tr>
+          <td>Horizontal PDF scroll at zoom</td>
+          <td><span class="tag tag--green">align-items: flex-start + margin: auto</span></td>
+          <td>align-items: center</td>
+          <td>Center alignment overflows both sides — browser scroll origin is 0 so left overflow is unreachable. flex-start constrains overflow to the right only.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

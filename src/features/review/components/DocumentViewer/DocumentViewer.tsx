@@ -1,6 +1,6 @@
 import { memo, useCallback, useRef, useEffect, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
-import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
+import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useReviewStore } from '../../store/reviewStore'
 import { cn } from '../../../../lib/cn'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
@@ -48,7 +48,12 @@ export const DocumentViewer = memo(function DocumentViewer({
     const el = containerRef.current
     if (!el) return
     isDragging.current = true
-    dragStart.current = { x: e.clientX, y: e.clientY, scrollLeft: el.scrollLeft, scrollTop: el.scrollTop }
+    dragStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: el.scrollLeft,
+      scrollTop: el.scrollTop,
+    }
     el.style.cursor = 'grabbing'
     el.style.userSelect = 'none'
   }, [])
@@ -178,6 +183,36 @@ export const DocumentViewer = memo(function DocumentViewer({
             <RotateCcw size={13} aria-hidden="true" />
           </button>
         )}
+
+        <div className="document-toolbar__divider" aria-hidden="true" />
+
+        <button
+          type="button"
+          className="zoom-controls__btn"
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          disabled={currentPage <= 1}
+          aria-label="Previous page"
+        >
+          <ChevronLeft size={15} aria-hidden="true" />
+        </button>
+
+        <span
+          className="document-toolbar__page"
+          aria-live="polite"
+          aria-label={`Page ${currentPage} of ${totalPages}`}
+        >
+          {currentPage} / {totalPages}
+        </span>
+
+        <button
+          type="button"
+          className="zoom-controls__btn"
+          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage >= totalPages}
+          aria-label="Next page"
+        >
+          <ChevronRight size={15} aria-hidden="true" />
+        </button>
       </div>
 
       <div

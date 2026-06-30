@@ -19,9 +19,13 @@ interface IssueCardProps {
  * - Wrapped in React.memo — up to 25 cards render in the list
  */
 export const IssueCard = memo(function IssueCard({ issue, isActive }: IssueCardProps) {
-  const { setCurrentPage, ignoreIssue, unignoreIssue, isIgnored, setActiveMobileTab } =
-    useReviewStore()
-  const ignored = isIgnored(issue.id)
+  // Granular selectors — each card re-renders only when its own ignored state or
+  // the actions it uses change, not on every setCurrentPage call during scroll.
+  const ignored = useReviewStore(state => state.ignoredIssues.has(issue.id))
+  const setCurrentPage = useReviewStore(state => state.setCurrentPage)
+  const ignoreIssue = useReviewStore(state => state.ignoreIssue)
+  const unignoreIssue = useReviewStore(state => state.unignoreIssue)
+  const setActiveMobileTab = useReviewStore(state => state.setActiveMobileTab)
 
   const handleJumpToPage = useCallback(() => {
     setCurrentPage(issue.page)
@@ -42,7 +46,7 @@ export const IssueCard = memo(function IssueCard({ issue, isActive }: IssueCardP
   )
 
   return (
-    <article
+    <div
       className={cn('issue-card', `issue-card--${issue.severity}`, {
         'issue-card--active': isActive,
         'issue-card--ignored': ignored,
@@ -50,7 +54,7 @@ export const IssueCard = memo(function IssueCard({ issue, isActive }: IssueCardP
       onClick={handleJumpToPage}
       role="button"
       tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && handleJumpToPage()}
+      onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleJumpToPage()}
       aria-label={`${issue.title}, ${issue.severity} severity, page ${issue.page}`}
     >
       <div className="issue-card__header">
@@ -82,6 +86,6 @@ export const IssueCard = memo(function IssueCard({ issue, isActive }: IssueCardP
           )}
         </button>
       )}
-    </article>
+    </div>
   )
 })

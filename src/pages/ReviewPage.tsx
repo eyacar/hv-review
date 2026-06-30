@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { FileText, AlertCircle } from 'lucide-react'
 import { useReview } from '../features/review/hooks/useReview'
@@ -14,6 +14,14 @@ export default function ReviewPage() {
   const { id: reviewId = '' } = useParams<{ id: string }>()
   const activeTab = useReviewStore(state => state.activeMobileTab)
   const setActiveTab = useReviewStore(state => state.setActiveMobileTab)
+  const ignoredIssues = useReviewStore(state => state.ignoredIssues)
+  const resetStore = useReviewStore(state => state.reset)
+
+  // Reset review state when navigating to a different review so ignored issues,
+  // current page, and active tab don't carry over from the previous session.
+  useEffect(() => {
+    resetStore()
+  }, [reviewId, resetStore])
 
   const { data: review, isLoading, isError, error, refetch } = useReview(reviewId)
 
@@ -23,12 +31,16 @@ export default function ReviewPage() {
     [review]
   )
 
+  // Mirrors the gate logic in SubmitBar — subtracts ignored issues so the
+  // mobile badge count stays in sync with the submit button state.
   const blockingCount = useMemo(
     () =>
       review
-        ? review.issues.filter(i => i.severity === 'critical' || i.severity === 'major').length
+        ? review.issues.filter(
+            i => (i.severity === 'critical' || i.severity === 'major') && !ignoredIssues.has(i.id)
+          ).length
         : 0,
-    [review]
+    [review, ignoredIssues]
   )
 
   const handleDocumentTab = useCallback(() => setActiveTab('document'), [setActiveTab])

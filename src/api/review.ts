@@ -1,7 +1,6 @@
-import type { Review } from './types'
 import { ReviewSchema } from './schemas'
 import mockData from './mock/review.json'
-import { getToken } from '../lib/auth'
+// Real implementation uses: import { getToken } from '../lib/auth'
 
 /**
  * Fetch a review by ID.
@@ -23,12 +22,12 @@ import { getToken } from '../lib/auth'
  * ```
  */
 export async function getReview(id: string): Promise<Review> {
-  void getToken() // will be used in real implementation
   try {
     if (!id) throw new Error('Review ID is required')
     await new Promise(res => setTimeout(res, 600))
-    // ReviewSchema.parse validates the shape at runtime — catches API drift early
-    return ReviewSchema.parse(mockData) as Review
+    // ReviewSchema.parse validates the shape at runtime — catches API drift early.
+    // The inferred return type already matches Review; no cast needed.
+    return ReviewSchema.parse(mockData)
   } catch (err) {
     throw new Error(
       err instanceof Error ? `Failed to load review: ${err.message}` : 'Failed to load review.',

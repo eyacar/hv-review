@@ -24,11 +24,12 @@ interface ReviewStore {
   setCurrentPage: (page: number) => void
   ignoreIssue: (id: string) => void
   unignoreIssue: (id: string) => void
-  isIgnored: (id: string) => boolean
   setActiveMobileTab: (tab: MobileTab) => void
+  /** Reset all review state when navigating to a different review. */
+  reset: () => void
 }
 
-export const useReviewStore = create<ReviewStore>((set, get) => ({
+export const useReviewStore = create<ReviewStore>(set => ({
   currentPage: 1,
   ignoredIssues: new Set(),
   activeMobileTab: 'document',
@@ -48,5 +49,10 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
       return { ignoredIssues: next }
     }),
 
-  isIgnored: (id: string) => get().ignoredIssues.has(id),
+  reset: () =>
+    set({
+      currentPage: 1,
+      ignoredIssues: new Set(),
+      activeMobileTab: 'document',
+    }),
 }))

@@ -28,7 +28,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = () => {
-    this.setState({ error: null })
+    // Full page reload resets the React tree and any corrupted state.
+    // setState here would be discarded before it takes effect.
     window.location.reload()
   }
 

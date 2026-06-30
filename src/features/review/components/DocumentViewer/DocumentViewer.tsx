@@ -102,6 +102,15 @@ export const DocumentViewer = memo(function DocumentViewer({
   )
   const zoomReset = useCallback(() => setZoom(ZOOM_DEFAULT), [])
 
+  const prevPage = useCallback(
+    () => setCurrentPage(Math.max(1, currentPage - 1)),
+    [currentPage, setCurrentPage]
+  )
+  const nextPage = useCallback(
+    () => setCurrentPage(Math.min(totalPages, currentPage + 1)),
+    [currentPage, totalPages, setCurrentPage]
+  )
+
   // Track container width for responsive PDF page sizing
   useEffect(() => {
     const el = containerRef.current
@@ -168,10 +177,6 @@ export const DocumentViewer = memo(function DocumentViewer({
     [setCurrentPage]
   )
 
-  const onDocumentLoadSuccess = useCallback(() => {
-    // Document loaded — pages will render lazily via IntersectionObserver
-  }, [])
-
   const pageWidth = Math.floor(containerWidth * zoom)
 
   return (
@@ -223,7 +228,7 @@ export const DocumentViewer = memo(function DocumentViewer({
         <button
           type="button"
           className="zoom-controls__btn"
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          onClick={prevPage}
           disabled={currentPage <= 1}
           aria-label="Previous page"
         >
@@ -241,7 +246,7 @@ export const DocumentViewer = memo(function DocumentViewer({
         <button
           type="button"
           className="zoom-controls__btn"
-          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+          onClick={nextPage}
           disabled={currentPage >= totalPages}
           aria-label="Next page"
         >
@@ -260,7 +265,6 @@ export const DocumentViewer = memo(function DocumentViewer({
       >
         <Document
           file={url}
-          onLoadSuccess={onDocumentLoadSuccess}
           loading={<DocumentSkeleton />}
           error={<DocumentError />}
           className="document-viewer__document"
@@ -295,7 +299,7 @@ export const DocumentViewer = memo(function DocumentViewer({
   )
 })
 
-function DocumentSkeleton() {
+const DocumentSkeleton = memo(function DocumentSkeleton() {
   return (
     <div className="document-viewer__skeleton" aria-label="Loading document…">
       {Array.from({ length: 3 }).map((_, i) => (
@@ -303,16 +307,16 @@ function DocumentSkeleton() {
       ))}
     </div>
   )
-}
+})
 
-function PageSkeleton() {
+const PageSkeleton = memo(function PageSkeleton() {
   return <div className="skeleton skeleton--page" aria-hidden="true" />
-}
+})
 
-function DocumentError() {
+const DocumentError = memo(function DocumentError() {
   return (
     <div className="document-viewer__error" role="alert">
       <p>Failed to load document. Please try refreshing the page.</p>
     </div>
   )
-}
+})

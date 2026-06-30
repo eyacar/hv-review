@@ -39,6 +39,7 @@ export const useReviewStore = create<ReviewStore>(set => ({
 
   ignoreIssue: (id: string) =>
     set(state => ({
+      // Immutable Set — Zustand uses reference equality to detect changes
       ignoredIssues: new Set([...state.ignoredIssues, id]),
     })),
 

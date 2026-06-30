@@ -42,6 +42,7 @@ export default function ReviewPage() {
   )
 
   const blockingCount = useMemo(
+    // Same gating logic as SubmitBar — keeps the mobile tab badge in sync
     () => (review ? getBlockingCount(review.issues, ignoredIssues) : 0),
     [review, ignoredIssues]
   )

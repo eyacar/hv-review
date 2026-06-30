@@ -13,9 +13,9 @@ npm run dev        # starts at http://localhost:5173
 
 Open `http://localhost:5173` and click **Open demo review**.
 
-**Live demo:** [https://hv-review.vercel.app](https://hv-review.vercel.app) — auto-deploys on every push to `main` via [Vercel](https://vercel.com). One-time setup: import this repo at [vercel.com/new](https://vercel.com/new) (framework preset: **Vite**, build: `npm run build`, output: `dist`). `vercel.json` handles SPA routing.
+**Live demo:** [https://hv-review.vercel.app](https://hv-review.vercel.app) (auto-deploys on every push to `main` via Vercel).
 
-> **Note:** locally, the demo PDF (`public/example_document.pdf`) is served by the Vite dev server. In production, `pdf_url` in the API response points to a CDN URL; `DocumentViewer` works unchanged.
+> **Note:** The demo PDF is served from `public/example_document.pdf`. In production, `pdf_url` would point to a CDN — `DocumentViewer` needs no changes.
 
 ---
 
@@ -96,53 +96,26 @@ src/
 
 ## User flows
 
-**Reviewing a document**
+**Review**
 
-1. A reviewer opens a review link (`/reviews/:id`). The page fetches review data and renders the PDF alongside the issue list.
-2. The step indicator in the header shows the current stage: Upload → Processing → **Review** → Submitted.
-3. The reviewer reads through the PDF. Clicking an issue card scrolls the document to the relevant page and highlights the card.
-4. Critical and Major issues must be resolved (or the document re-uploaded) before submission. Minor issues can be individually ignored via the eye icon — ignored issues are removed from the blocking count.
-5. Once all blocking issues are cleared, the Submit button becomes active. Clicking it calls the submit endpoint and navigates to the Submitted state.
+1. Open `/reviews/:id` — fetches review data, renders PDF + issue list side by side.
+2. Click an issue → scrolls to that page and highlights the card (on mobile, switches to the Document tab).
+3. Critical/Major issues block submission; Minor issues can be ignored individually.
+4. When all blocking issues are cleared, Submit becomes active.
 
-**Filtering issues**
+**Filters** — tabs narrow the issue list; the submission gate always counts the full unfiltered list.
 
-The filter tabs (All / Critical / Major / Minor) narrow the issue list without affecting the submission gate — the gate always counts against the full unfiltered list.
-
-**Mobile**
-
-On narrow viewports the layout switches to a single-panel view with a tab bar at the bottom. The Issues tab shows a badge with the blocking count. Clicking an issue automatically switches to the Document tab and scrolls to the right page.
+**Mobile** — single-panel layout with a bottom tab bar; Issues tab shows a blocking-count badge.
 
 ---
 
 ## Key features
 
-**PDF viewer**
-
-- Text layer enabled → CMD+F / Ctrl+F native browser search works
-- Lazy page rendering via IntersectionObserver → only visible pages render, memory stays flat
-- Zoom controls (50%–200%) in the toolbar
-- Click-and-drag panning (like Figma) — works at all zoom levels
-- Prev / Next page buttons with current page indicator
-- Programmatic scroll when clicking an issue
-
-**Issues panel**
-
-- Grouped by severity: Critical → Major → Minor
-- Filter tabs (All / Critical / Major / Minor) to narrow the list
-- Ignore button for minor issues — ignored issues don't block submission
-- Clicking an issue scrolls the PDF to the right page and (on mobile) switches to the Document tab
-
-**Header**
-
-- Step indicator showing: Upload → Processing → Review → Submitted
-- Submit button blocked (aria-disabled) while critical/major issues remain
-- Theme toggle (light/dark) — defaults to OS preference, persists across sessions
-
-**Mobile**
-
-- Tab bar at the bottom switches between Document and Issues panels
-- Blocking issue count shown as badge on the Issues tab
-- Step indicator shows only the current step label on small screens
+| Area         | Highlights                                                                             |
+| ------------ | -------------------------------------------------------------------------------------- |
+| PDF viewer   | CMD+F text layer, lazy page mounting, zoom (50–200%), drag-to-scroll, page navigation  |
+| Issues panel | Grouped by severity, filter tabs, ignore for minor issues                              |
+| Header       | Step indicator, blocked submit (`aria-disabled`), theme toggle (OS default, persisted) |
 
 ---
 
@@ -160,9 +133,7 @@ On narrow viewports the layout switches to a single-panel view with a tab bar at
 
 ## Mock API
 
-`src/api/review.ts` exports `getReview()` and `submitReview()`. Both functions simulate network latency (600ms / 800ms). Swapping to a real backend is a one-line change in each function body — the hook, component, and type contracts don't change.
-
-The example PDF is `public/example_document.pdf`, served by the local Vite dev server at `/example_document.pdf`. No extra setup needed — `npm run dev` makes it available automatically. In production, `pdf_url` in the API response would point to a CDN or object storage URL; the `DocumentViewer` component doesn't change.
+`src/api/review.ts` exports `getReview()` and `submitReview()` with simulated latency (600 ms / 800 ms). The mock validates the review ID and returns data only for the demo review (`souj5sd12c8a3f`); unknown IDs throw a not-found error. Swap the function bodies for real `fetch` calls — hooks and components stay unchanged.
 
 ### API Contract
 
@@ -215,21 +186,17 @@ npm run test           # single run
 npm run test:watch     # interactive watch mode
 ```
 
-**Strategy:** tests are split by concern — pure logic first, then components, then accessibility. No end-to-end tests (out of scope for this take-home; would use Playwright in production).
+**Strategy:** pure logic → components → accessibility. No e2e (out of scope; would use Playwright in production).
 
-**Coverage:**
-
-`features/review/__tests__/submissionLogic.test.ts` — 8 pure unit tests against `src/features/review/lib/submissionLogic.ts`. Tests the submission gating rules in isolation: blocking issues prevent submit, ignored issues are excluded from the count, edge cases (empty list, all ignored, mixed severities). These run in under 50ms.
-
-`features/review/components/IssueCard/IssueCard.test.tsx` — component tests with `@testing-library/react`. Covers: renders issue title and description, clicking card calls `setCurrentPage`, ignore/unignore toggles aria state and removes the issue from the blocking count, active state applied correctly.
-
-`features/review/components/IssuesPanel/IssuesPanel.test.tsx` — filter tabs narrow the list by severity; empty state when a filter matches nothing.
-
-`features/review/components/SubmitBar/SubmitBar.test.tsx` — submit button uses `aria-disabled` while blocking issues remain; blocking count message renders; submit is allowed when only minor issues exist.
-
-`features/review/components/StatusBadge/StatusBadge.test.tsx` — accessibility regression tests for WCAG 1.4.1 (use of color). Verifies each severity badge communicates its level via visible text and icon, not color alone. Prevents regressions if badge markup is refactored.
-
-**What's not tested and why:** `DocumentViewer` is not unit-tested because it depends on `pdfjs-dist` which requires a real browser canvas context — better covered by an e2e test (Playwright). It is lazy-loaded to keep the initial review route bundle smaller.
+| File                      | What it covers                                                |
+| ------------------------- | ------------------------------------------------------------- |
+| `submissionLogic.test.ts` | Gating rules: blocking severities, ignored issues, edge cases |
+| `IssueCard.test.tsx`      | Render, navigation, ignore/unignore, keyboard                 |
+| `IssuesPanel.test.tsx`    | Severity filters, empty state                                 |
+| `SubmitBar.test.tsx`      | `aria-disabled` gating, blocking message, submit action       |
+| `DocumentViewer.test.tsx` | Toolbar controls, page navigation, zoom, page wrapper count   |
+| `StatusBadge.test.tsx`    | WCAG 1.4.1 — severity via text, not color alone               |
+| `review.test.ts`          | Mock API: valid ID returns data, unknown ID throws 404-style  |
 
 ---
 
@@ -253,4 +220,4 @@ GitHub Actions runs on every push and PR to `main`:
 
 ## Architecture notes
 
-For the full reasoning behind every technical decision — why Vite over Next.js, why Zustand over Context, how the PDF text layer works, the horizontal scroll fix, the mobile tab architecture, and what production would require — see [`docs/PLAN.md`](docs/PLAN.md).
+Full architectural reasoning — stack choices, PDF text layer, mobile tabs, production gaps — in [`docs/PLAN.md`](docs/PLAN.md).

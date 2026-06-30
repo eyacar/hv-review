@@ -136,7 +136,9 @@ export const DocumentViewer = memo(function DocumentViewer({
     return () => observer.disconnect()
   }, [])
 
-  // Scroll to page when currentPage changes (e.g. user clicked an issue)
+  // Scroll to the target page when the user clicks an issue in the panel.
+  // The 800 ms guard matches smooth-scroll duration — prevents the observer
+  // from overwriting currentPage while the scroll animation is in flight.
   useEffect(() => {
     const pageEl = pageRefs.current[currentPage - 1]
     if (!pageEl) return
@@ -177,6 +179,7 @@ export const DocumentViewer = memo(function DocumentViewer({
             })
           }
           if (entry.intersectionRatio >= 0.5 && !isScrollingProgrammatically.current) {
+            // User scrolled manually — sync the issues panel highlight to the visible page
             setCurrentPage(pageNum)
           }
         },

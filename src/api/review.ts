@@ -4,6 +4,9 @@ import { resolveAssetUrl } from '../lib/assets'
 import mockData from './mock/review.json'
 // Real implementation uses: import { getToken } from '../lib/auth'
 
+/** Demo review ID — matches HomePage and mock/review.json. */
+export const MOCK_REVIEW_ID = mockData.id
+
 /**
  * Fetch a review by ID.
  *
@@ -28,8 +31,9 @@ export async function getReview(id: string): Promise<Review> {
     if (!id) throw new Error('Review ID is required')
     // Simulates ~600ms network round-trip. Replace with fetch() when the API is ready.
     await new Promise(resolve => setTimeout(resolve, 600))
-    // ReviewSchema.parse validates the shape at runtime — catches API drift early.
-    // The inferred return type already matches Review; no cast needed.
+    if (id !== MOCK_REVIEW_ID) {
+      throw new Error(`Review not found: ${id}`)
+    }
     const review = ReviewSchema.parse(mockData)
     return {
       ...review,
@@ -72,7 +76,9 @@ export async function submitReview(id: string): Promise<void> {
   try {
     if (!id) throw new Error('Review ID is required')
     await new Promise(res => setTimeout(res, 800))
-    // no-op — endpoint not ready
+    if (id !== MOCK_REVIEW_ID) {
+      throw new Error(`Review not found: ${id}`)
+    }
   } catch (err) {
     throw new Error(
       err instanceof Error ? `Failed to submit review: ${err.message}` : 'Failed to submit review.',

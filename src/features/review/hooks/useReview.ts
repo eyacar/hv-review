@@ -3,31 +3,22 @@ import { getReview, submitReview } from '../../../api/review'
 import type { Review } from '../../../api/types'
 
 /**
- * Fetches the review data for a given ID.
- *
- * Behavior:
- * - Skips the fetch when `id` is empty (`enabled: false`) to avoid 404s during routing.
- * - React Query caches the result by `['review', id]` — navigating away and back won't re-fetch.
- * - On error, React Query retries once (see QueryClient defaults in `main.tsx`) before surfacing `isError`.
- * - When the real API is ready, only `getReview()` in `src/api/review.ts` changes — this hook
- *   and all consuming components stay the same.
+ * Fetches review data for the given ID.
+ * Only `getReview()` in `src/api/review.ts` changes when the real API is ready.
  */
 export function useReview(id: string) {
   return useQuery<Review, Error>({
+    // Scoped cache — navigating between reviews keeps each result independent
     queryKey: ['review', id],
     queryFn: () => getReview(id),
+    // Params can be empty during initial mount; skip fetch to avoid invalid requests
     enabled: Boolean(id),
   })
 }
 
 /**
- * Submits the review for a given ID.
- *
- * Behavior:
- * - Returns `mutate(id)` — call it from the submit button handler.
- * - `isSuccess` is `true` after a successful submit; use it to trigger navigation to /submitted.
- * - `isPending` is `true` while the request is in-flight; use it to disable the button.
- * - The endpoint is not ready yet — `submitReview()` is a no-op stub that resolves after 800ms.
+ * Submits a review. Returns `mutate(id)` for the submit button handler.
+ * `isPending` disables the button; `isSuccess` triggers navigation to /submitted.
  */
 export function useSubmitReview() {
   return useMutation<undefined, Error, string>({

@@ -49,10 +49,14 @@ export const DocumentViewer = memo(function DocumentViewer({
   // Stores per-page observers so we can disconnect on unmount or ref change
   const observersRef = useRef<Map<number, IntersectionObserver>>(new Map())
 
-  // Disconnect all observers on unmount
+  // Cleanup: disconnect all per-page IntersectionObservers when the component unmounts.
+  // Individual observers are also disconnected in handlePageRef before re-attaching,
+  // so there is no double-disconnect risk.
   useEffect(() => {
+    const observers = observersRef.current
     return () => {
-      observersRef.current.forEach(obs => obs.disconnect())
+      observers.forEach(obs => obs.disconnect())
+      observers.clear()
     }
   }, [])
 

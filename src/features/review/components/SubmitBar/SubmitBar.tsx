@@ -61,6 +61,10 @@ function StepIndicator({ status }: { status: ReviewStatus }) {
   )
 }
 
+// Severities that block submission — defined at module level so it's not recreated on each render.
+// Minor issues are never blocking; they can be individually ignored by the reviewer.
+const BLOCKING_SEVERITIES = new Set<string>(['critical', 'major'])
+
 // ── SubmitBar ─────────────────────────────────────────────────
 
 interface SubmitBarProps {
@@ -106,10 +110,7 @@ export const SubmitBar = memo(function SubmitBar({
   const blockingDescId = useId()
 
   const blockingIssues = useMemo(
-    () =>
-      issues.filter(
-        i => (i.severity === 'critical' || i.severity === 'major') && !ignoredIssues.has(i.id)
-      ),
+    () => issues.filter(i => BLOCKING_SEVERITIES.has(i.severity) && !ignoredIssues.has(i.id)),
     [issues, ignoredIssues]
   )
 

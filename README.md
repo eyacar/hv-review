@@ -91,6 +91,26 @@ src/
 
 ---
 
+## User flows
+
+**Reviewing a document**
+
+1. A reviewer opens a review link (`/reviews/:id`). The page fetches review data and renders the PDF alongside the issue list.
+2. The step indicator in the header shows the current stage: Upload → Processing → **Review** → Submitted.
+3. The reviewer reads through the PDF. Clicking an issue card scrolls the document to the relevant page and highlights the card.
+4. Critical and Major issues must be resolved (or the document re-uploaded) before submission. Minor issues can be individually ignored via the eye icon — ignored issues are removed from the blocking count.
+5. Once all blocking issues are cleared, the Submit button becomes active. Clicking it calls the submit endpoint and navigates to the Submitted state.
+
+**Filtering issues**
+
+The filter tabs (All / Critical / Major / Minor) narrow the issue list without affecting the submission gate — the gate always counts against the full unfiltered list.
+
+**Mobile**
+
+On narrow viewports the layout switches to a single-panel view with a tab bar at the bottom. The Issues tab shows a badge with the blocking count. Clicking an issue automatically switches to the Document tab and scrolls to the right page.
+
+---
+
 ## Key features
 
 **PDF viewer**

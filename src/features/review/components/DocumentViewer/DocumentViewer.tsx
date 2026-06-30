@@ -23,9 +23,20 @@ interface DocumentViewerProps {
 }
 
 /**
- * PDF viewer with:
+ * PDF viewer optimised for large documents.
+ *
+ * Memory strategy — lazy page mounting via IntersectionObserver:
+ * - Each page wrapper div is always in the DOM (preserves scroll height / no layout shift).
+ * - The react-pdf <Page> is only mounted once the wrapper enters the viewport (threshold 0.1).
+ * - Once mounted, pages stay mounted — avoids re-parsing PDF binary data on scroll-back.
+ * - Per-page IntersectionObservers are stored in a Map ref and disconnected on unmount,
+ *   preventing memory leaks regardless of document length.
+ *
+ * This means memory usage is bounded by the number of pages the user has scrolled past,
+ * not the total page count — a 200-page PDF does not load all 200 pages up front.
+ *
+ * Additional features:
  * - Text layer enabled → CMD+F native search works via DOM text elements
- * - Lazy page rendering via IntersectionObserver → only visible pages are rendered
  * - Programmatic scroll when currentPage changes (triggered by clicking an issue)
  * - Page scroll tracking → updates currentPage in the store so the issues panel stays in sync
  * - Zoom controls (50%–200%) → floating toolbar that doesn't affect the scrollable area

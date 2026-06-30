@@ -161,6 +161,44 @@ On narrow viewports the layout switches to a single-panel view with a tab bar at
 
 The example PDF is `public/example_document.pdf`, served by the local Vite dev server at `/example_document.pdf`. No extra setup needed — `npm run dev` makes it available automatically. In production, `pdf_url` in the API response would point to a CDN or object storage URL; the `DocumentViewer` component doesn't change.
 
+### API Contract
+
+All shapes are defined as Zod schemas in `src/api/schemas.ts` and inferred at compile time in `src/api/types.ts`. Runtime validation runs on every `getReview()` call — schema drift is caught immediately.
+
+**`GET /reviews/:id`** → `Review`
+
+```ts
+{
+  id: string
+  name: string
+  version: string
+  status: 'pending' | 'approved' | 'rejected'
+  uploaded_at: string // ISO 8601
+  user: {
+    id: string
+    first_name: string
+    last_name: string
+    email: string
+  }
+  document: {
+    id: string
+    pdf_url: string // CDN or local path
+    pages: Array<{ id: string; page_number: number }>
+  }
+  issues: Array<{
+    id: string
+    title: string
+    description: string
+    severity: 'critical' | 'major' | 'minor'
+    page_number: number
+  }>
+}
+```
+
+**`POST /reviews/:id/submit`** → `204 No Content`
+
+No request body. Returns 204 on success; the client treats any non-2xx as an error and surfaces it via the error state in `useSubmitReview`.
+
 ---
 
 ## Theme

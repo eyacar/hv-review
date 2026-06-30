@@ -4,6 +4,7 @@ import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-re
 import { useReviewStore } from '../../store/reviewStore'
 import { cn } from '../../../../lib/cn'
 import { resolveAssetUrl } from '../../../../lib/assets'
+import { DocumentViewerPropsSchema, type DocumentViewerProps } from '../../schemas/componentProps'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
@@ -15,13 +16,6 @@ const ZOOM_MIN = 0.5
 const ZOOM_MAX = 2.0
 const ZOOM_STEP = 0.25
 const ZOOM_DEFAULT = 1.0
-
-interface DocumentViewerProps {
-  /** URL of the PDF to render — can be a local path (dev) or CDN URL (production). */
-  url: string
-  /** Total number of pages in the document, used to render page wrappers and clamp navigation. */
-  totalPages: number
-}
 
 /**
  * PDF viewer optimised for large documents.
@@ -42,10 +36,8 @@ interface DocumentViewerProps {
  * - Page scroll tracking → updates currentPage in the store so the issues panel stays in sync
  * - Zoom controls (50%–200%) → floating toolbar that doesn't affect the scrollable area
  */
-export const DocumentViewer = memo(function DocumentViewer({
-  url,
-  totalPages,
-}: DocumentViewerProps) {
+export const DocumentViewer = memo(function DocumentViewer(rawProps: DocumentViewerProps) {
+  const { url, totalPages } = DocumentViewerPropsSchema.parse(rawProps)
   const currentPage = useReviewStore(state => state.currentPage)
   const setCurrentPage = useReviewStore(state => state.setCurrentPage)
   const pageRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -301,11 +293,11 @@ export const DocumentViewer = memo(function DocumentViewer({
 })
 
 interface DocumentPageSlotProps {
-  pageNum: number
-  isActive: boolean
-  isVisible: boolean
-  pageWidth: number
-  onPageRef: (el: HTMLDivElement | null, pageNum: number) => void
+  readonly pageNum: number
+  readonly isActive: boolean
+  readonly isVisible: boolean
+  readonly pageWidth: number
+  readonly onPageRef: (el: HTMLDivElement | null, pageNum: number) => void
 }
 
 /** Stable ref callback per page — avoids IntersectionObserver churn on parent re-renders. */

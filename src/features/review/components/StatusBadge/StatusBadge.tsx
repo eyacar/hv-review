@@ -1,16 +1,12 @@
 import { memo } from 'react'
 import { AlertTriangle, AlertCircle, Info } from 'lucide-react'
 import { cn } from '../../../../lib/cn'
-import type { IssueSeverity } from '../../../../api/types'
+import { StatusBadgePropsSchema, type StatusBadgeProps } from '../../schemas/componentProps'
 
-interface StatusBadgeProps {
-  /** Issue severity level — determines color, icon, and label. */
-  severity: IssueSeverity
-  /** Optional extra class for positioning overrides from parent layouts. */
-  className?: string
-}
-
-const config: Record<IssueSeverity, { label: string; icon: React.ReactNode; className: string }> = {
+const config: Record<
+  StatusBadgeProps['severity'],
+  { label: string; icon: React.ReactNode; className: string }
+> = {
   critical: {
     label: 'Critical',
     icon: <AlertCircle size={12} aria-hidden="true" />,
@@ -32,7 +28,8 @@ const config: Record<IssueSeverity, { label: string; icon: React.ReactNode; clas
  * Displays issue severity as a colored badge.
  * Color is never the only indicator — icon + text are always present (WCAG 1.4.1).
  */
-export const StatusBadge = memo(function StatusBadge({ severity, className }: StatusBadgeProps) {
+export const StatusBadge = memo(function StatusBadge(rawProps: StatusBadgeProps) {
+  const { severity, className } = StatusBadgePropsSchema.parse(rawProps)
   const { label, icon, className: severityClass } = config[severity]
 
   return (

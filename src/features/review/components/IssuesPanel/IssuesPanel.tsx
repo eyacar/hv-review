@@ -3,11 +3,7 @@ import { IssueCard } from '../IssueCard/IssueCard'
 import { useReviewStore } from '../../store/reviewStore'
 import { cn } from '../../../../lib/cn'
 import type { Issue, IssueSeverity } from '../../../../api/types'
-
-interface IssuesPanelProps {
-  /** Full list of issues for this review, sorted and filtered internally by severity. */
-  issues: readonly Issue[]
-}
+import { IssuesPanelPropsSchema, type IssuesPanelProps } from '../../schemas/componentProps'
 
 const SEVERITY_ORDER: IssueSeverity[] = ['critical', 'major', 'minor']
 
@@ -31,7 +27,8 @@ const FILTER_OPTIONS: { value: Filter; label: string }[] = [
  * Filter tabs let users focus on a specific severity without scrolling.
  * Uses aria-live so screen readers announce changes to the list.
  */
-export const IssuesPanel = memo(function IssuesPanel({ issues }: IssuesPanelProps) {
+export const IssuesPanel = memo(function IssuesPanel(rawProps: IssuesPanelProps) {
+  const { issues } = IssuesPanelPropsSchema.parse(rawProps)
   const currentPage = useReviewStore(state => state.currentPage)
   const [filter, setFilter] = useState<Filter>('all')
 

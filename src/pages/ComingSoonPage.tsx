@@ -1,10 +1,15 @@
 import { useEffect } from 'react'
 
-interface ComingSoonPageProps {
-  title: string
-}
+import { z } from 'zod'
 
-export default function ComingSoonPage({ title }: ComingSoonPageProps) {
+const ComingSoonPagePropsSchema = z.object({
+  title: z.string().min(1),
+})
+
+type ComingSoonPageProps = z.infer<typeof ComingSoonPagePropsSchema>
+
+export default function ComingSoonPage(rawProps: ComingSoonPageProps) {
+  const { title } = ComingSoonPagePropsSchema.parse(rawProps)
   useEffect(() => {
     document.title = `${title} — HomeVision`
     return () => {

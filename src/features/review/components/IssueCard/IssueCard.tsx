@@ -3,14 +3,7 @@ import { FileText, EyeOff, Eye } from 'lucide-react'
 import { StatusBadge } from '../StatusBadge/StatusBadge'
 import { useReviewStore } from '../../store/reviewStore'
 import { cn } from '../../../../lib/cn'
-import type { Issue } from '../../../../api/types'
-
-interface IssueCardProps {
-  /** The issue to display, including severity, description, and page reference. */
-  readonly issue: Issue
-  /** Whether this card is the currently active issue (highlighted, scrolled into view). */
-  readonly isActive: boolean
-}
+import { IssueCardPropsSchema, type IssueCardProps } from '../../schemas/componentProps'
 
 /**
  * Renders a single issue.
@@ -18,7 +11,8 @@ interface IssueCardProps {
  * - Minor issues can be individually ignored/unignored
  * - Wrapped in React.memo — up to 25 cards render in the list
  */
-export const IssueCard = memo(function IssueCard({ issue, isActive }: IssueCardProps) {
+export const IssueCard = memo(function IssueCard(rawProps: IssueCardProps) {
+  const { issue, isActive } = IssueCardPropsSchema.parse(rawProps)
   // Granular selectors — each card re-renders only when its own ignored state or
   // the actions it uses change, not on every setCurrentPage call during scroll.
   const ignored = useReviewStore(state => state.ignoredIssues.has(issue.id))

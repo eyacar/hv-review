@@ -6,7 +6,8 @@ import { useSubmitReview } from '../../hooks/useReview'
 import { canSubmit, getBlockingIssues } from '../../lib/submissionLogic'
 import { cn } from '../../../../lib/cn'
 import { ThemeToggle } from '../../../../shared/components/ThemeToggle/ThemeToggle'
-import type { Issue, ReviewStatus } from '../../../../api/types'
+import type { ReviewStatus } from '../../../../api/types'
+import { SubmitBarPropsSchema, type SubmitBarProps } from '../../schemas/componentProps'
 
 // ── Step indicator ────────────────────────────────────────────
 
@@ -25,7 +26,7 @@ function statusToStepIndex(status: ReviewStatus): number {
   }
 }
 
-const StepIndicator = memo(function StepIndicator({ status }: { status: ReviewStatus }) {
+const StepIndicator = memo(function StepIndicator({ status }: { readonly status: ReviewStatus }) {
   const currentIndex = statusToStepIndex(status)
 
   return (
@@ -64,23 +65,6 @@ const StepIndicator = memo(function StepIndicator({ status }: { status: ReviewSt
 
 // ── SubmitBar ─────────────────────────────────────────────────
 
-interface SubmitBarProps {
-  /** Unique identifier for the review — used to call the submit endpoint. */
-  reviewId: string
-  /** Human-readable name of the document being reviewed, shown in the header and page title. */
-  reviewName: string
-  /** Document version number displayed in the metadata row. */
-  version: number
-  /** Current workflow status — drives the step indicator highlight. */
-  status: ReviewStatus
-  /** ISO 8601 timestamp of when the document was uploaded, formatted for display. */
-  uploadedAt: string
-  /** Name of the reviewer assigned to this document. */
-  userName: string
-  /** Full list of issues; used to compute blocking count and disable/enable submit. */
-  issues: readonly Issue[]
-}
-
 /**
  * Header bar with:
  * - Dynamic page title via useEffect (document.title) — synced to reviewName
@@ -93,15 +77,9 @@ interface SubmitBarProps {
  * Submit uses aria-disabled (not just disabled) so keyboard users can still reach it
  * and screen readers can announce why it's blocked via aria-describedby.
  */
-export const SubmitBar = memo(function SubmitBar({
-  reviewId,
-  reviewName,
-  version,
-  status,
-  uploadedAt,
-  userName,
-  issues,
-}: SubmitBarProps) {
+export const SubmitBar = memo(function SubmitBar(rawProps: SubmitBarProps) {
+  const { reviewId, reviewName, version, status, uploadedAt, userName, issues } =
+    SubmitBarPropsSchema.parse(rawProps)
   const ignoredIssues = useReviewStore(state => state.ignoredIssues)
   const { mutate: submit, isPending, isSuccess } = useSubmitReview()
   const blockingDescId = useId()

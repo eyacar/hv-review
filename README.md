@@ -13,7 +13,7 @@ npm run dev        # starts at http://localhost:5173
 
 Open `http://localhost:5173` and click **Open demo review**.
 
-**Live demo:** [https://hv-review.vercel.app](https://hv-review.vercel.app) (auto-deploys on every push to `main` via Vercel).
+**Live demo:** [https://hv-review.vercel.app](https://hv-review.vercel.app) — automatically deploys on every push to `main` via Vercel.
 
 > **Note:** The demo PDF is served from `public/example_document.pdf`. In production, `pdf_url` would point to a CDN — `DocumentViewer` needs no changes.
 
@@ -66,6 +66,7 @@ src/
 ├── features/review/       # Everything for the Review page
 │   ├── __tests__/         # Pure unit tests (submission logic)
 │   ├── lib/               # Pure helpers (submission gating)
+│   ├── schemas/           # Zod prop schemas for runtime component validation
 │   ├── components/
 │   │   ├── DocumentViewer/  # PDF viewer: zoom, drag-to-scroll, lazy pages
 │   │   ├── IssuesPanel/     # Issue list with severity filter tabs

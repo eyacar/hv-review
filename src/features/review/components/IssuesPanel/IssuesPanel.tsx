@@ -32,6 +32,7 @@ export const IssuesPanel = memo(function IssuesPanel(rawProps: IssuesPanelProps)
   const currentPage = useReviewStore(state => state.currentPage)
   const [filter, setFilter] = useState<Filter>('all')
 
+  // Filter tabs narrow the list only — submission gating in SubmitBar always uses the full issue set.
   const grouped = useMemo(() => {
     const source = filter === 'all' ? issues : issues.filter(i => i.severity === filter)
     return SEVERITY_ORDER.reduce<Record<IssueSeverity, Issue[]>>(

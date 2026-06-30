@@ -37,6 +37,8 @@ export async function getReview(id: string): Promise<Review> {
       },
     }
   } catch (err) {
+    // All failures normalize to ApiError so hooks/UI can branch on `code` via getApiErrorMessage().
+    // Re-throw known codes as-is; map Zod drift to VALIDATION; wrap everything else as UNKNOWN.
     if (err instanceof ApiError) throw err
     if (err instanceof z.ZodError) {
       throw new ApiError('VALIDATION', 'Review response failed schema validation', {
@@ -67,6 +69,7 @@ export async function submitReview(id: string): Promise<void> {
       throw new ApiError('NOT_FOUND', `Review not found: ${id}`)
     }
   } catch (err) {
+    // Same normalization as getReview — keeps useSubmitReview error handling consistent.
     if (err instanceof ApiError) throw err
     throw new ApiError('UNKNOWN', err instanceof Error ? err.message : 'Failed to submit review', {
       cause: err,

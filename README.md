@@ -15,7 +15,7 @@ Open `http://localhost:5173` and click **Open demo review**.
 
 **Live demo:** [https://hv-review.vercel.app](https://hv-review.vercel.app) — automatically deploys on every push to `main` via Vercel.
 
-> **Note:** The demo PDF is served from `public/example_document.pdf`. In production, `pdf_url` would point to a CDN — `DocumentViewer` needs no changes.
+> **Demo PDF:** The sample file is at `public/example_document.pdf`. The mock API returns that path as `pdf_url`; in production it would be a CDN URL. `DocumentViewer` accepts any URL and needs no changes.
 
 ---
 

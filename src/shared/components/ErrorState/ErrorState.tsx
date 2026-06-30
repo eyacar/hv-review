@@ -23,7 +23,7 @@ export const ErrorState = memo(function ErrorState({
     <div className="review-layout__error" role="alert">
       <h2>{title}</h2>
       <p>{message}</p>
-      <button type="button" onClick={onRetry}>
+      <button type="button" onClick={onRetry} aria-label="Try again">
         Try again
       </button>
     </div>

@@ -1,39 +1,22 @@
-export type IssueSeverity = 'critical' | 'major' | 'minor'
+/**
+ * All TypeScript types are inferred from Zod schemas in schemas.ts.
+ * This ensures compile-time types and runtime validation stay in sync.
+ */
+import type { z } from 'zod'
+import type {
+  IssueSeveritySchema,
+  ReviewStatusSchema,
+  IssueSchema,
+  DocumentPageSchema,
+  ReviewDocumentSchema,
+  ReviewUserSchema,
+  ReviewSchema,
+} from './schemas'
 
-export type ReviewStatus = 'created' | 'processing' | 'on_review' | 'submitted'
-
-export interface Issue {
-  id: string
-  title: string
-  description: string
-  severity: IssueSeverity
-  page: number
-}
-
-export interface DocumentPage {
-  page_num: number
-  height: number
-  width: number
-}
-
-export interface ReviewDocument {
-  pdf_url: string
-  pages: DocumentPage[]
-}
-
-export interface ReviewUser {
-  id: string
-  first_name: string
-  last_name: string
-}
-
-export interface Review {
-  id: string
-  name: string
-  uploaded_at: string
-  status: ReviewStatus
-  version: number
-  document: ReviewDocument
-  user: ReviewUser
-  issues: Issue[]
-}
+export type IssueSeverity = z.infer<typeof IssueSeveritySchema>
+export type ReviewStatus = z.infer<typeof ReviewStatusSchema>
+export type Issue = z.infer<typeof IssueSchema>
+export type DocumentPage = z.infer<typeof DocumentPageSchema>
+export type ReviewDocument = z.infer<typeof ReviewDocumentSchema>
+export type ReviewUser = z.infer<typeof ReviewUserSchema>
+export type Review = z.infer<typeof ReviewSchema>

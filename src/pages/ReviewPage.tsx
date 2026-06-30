@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { FileText, AlertCircle } from 'lucide-react'
 import { useReview } from '../features/review/hooks/useReview'
@@ -16,14 +17,26 @@ export default function ReviewPage() {
 
   const { data: review, isLoading, isError, error, refetch } = useReview(reviewId)
 
+  // Hooks must be declared before early returns — use optional chaining for pre-data state
+  const userName = useMemo(
+    () => (review ? `${review.user.first_name} ${review.user.last_name}` : ''),
+    [review]
+  )
+
+  const blockingCount = useMemo(
+    () =>
+      review
+        ? review.issues.filter(i => i.severity === 'critical' || i.severity === 'major').length
+        : 0,
+    [review]
+  )
+
+  const handleDocumentTab = useCallback(() => setActiveTab('document'), [setActiveTab])
+  const handleIssuesTab = useCallback(() => setActiveTab('issues'), [setActiveTab])
+
   if (isLoading) return <ReviewSkeleton />
   if (isError) return <ReviewError message={error.message} onRetry={refetch} />
   if (!review) return null
-
-  const userName = `${review.user.first_name} ${review.user.last_name}`
-  const blockingCount = review.issues.filter(
-    i => i.severity === 'critical' || i.severity === 'major'
-  ).length
 
   return (
     <div className="review-layout">
@@ -62,7 +75,7 @@ export default function ReviewPage() {
           className={cn('mobile-tabs__tab', {
             'mobile-tabs__tab--active': activeTab === 'document',
           })}
-          onClick={() => setActiveTab('document')}
+          onClick={handleDocumentTab}
           aria-pressed={activeTab === 'document'}
         >
           <FileText size={18} aria-hidden="true" />
@@ -71,7 +84,7 @@ export default function ReviewPage() {
         <button
           type="button"
           className={cn('mobile-tabs__tab', { 'mobile-tabs__tab--active': activeTab === 'issues' })}
-          onClick={() => setActiveTab('issues')}
+          onClick={handleIssuesTab}
           aria-pressed={activeTab === 'issues'}
         >
           <AlertCircle size={18} aria-hidden="true" />

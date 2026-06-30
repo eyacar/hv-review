@@ -1,4 +1,5 @@
 import type { Review } from './types'
+import { ReviewSchema } from './schemas'
 import mockData from './mock/review.json'
 import { getToken } from '../lib/auth'
 
@@ -26,7 +27,8 @@ export async function getReview(id: string): Promise<Review> {
   try {
     if (!id) throw new Error('Review ID is required')
     await new Promise(res => setTimeout(res, 600))
-    return mockData as Review
+    // ReviewSchema.parse validates the shape at runtime — catches API drift early
+    return ReviewSchema.parse(mockData) as Review
   } catch (err) {
     throw new Error(
       err instanceof Error ? `Failed to load review: ${err.message}` : 'Failed to load review.',

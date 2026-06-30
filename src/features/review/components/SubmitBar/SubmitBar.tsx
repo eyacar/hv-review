@@ -24,7 +24,7 @@ function statusToStepIndex(status: ReviewStatus): number {
   }
 }
 
-function StepIndicator({ status }: { status: ReviewStatus }) {
+const StepIndicator = memo(function StepIndicator({ status }: { status: ReviewStatus }) {
   const currentIndex = statusToStepIndex(status)
 
   return (
@@ -59,7 +59,7 @@ function StepIndicator({ status }: { status: ReviewStatus }) {
       })}
     </nav>
   )
-}
+})
 
 // Severities that block submission — defined at module level so it's not recreated on each render.
 // Minor issues are never blocking; they can be individually ignored by the reviewer.

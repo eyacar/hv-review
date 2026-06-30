@@ -159,7 +159,7 @@ On narrow viewports the layout switches to a single-panel view with a tab bar at
 
 `src/api/review.ts` exports `getReview()` and `submitReview()`. Both functions simulate network latency (600ms / 800ms). Swapping to a real backend is a one-line change in each function body — the hook, component, and type contracts don't change.
 
-The example PDF (`public/example_document.pdf`) is served locally by Vite. In production, `pdf_url` in the API response would point to a CDN or object storage URL — the viewer doesn't change.
+The example PDF is `public/example_document.pdf`, served by the local Vite dev server at `/example_document.pdf`. No extra setup needed — `npm run dev` makes it available automatically. In production, `pdf_url` in the API response would point to a CDN or object storage URL; the `DocumentViewer` component doesn't change.
 
 ---
 

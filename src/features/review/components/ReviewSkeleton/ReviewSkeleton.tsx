@@ -1,9 +1,11 @@
+import { memo } from 'react'
+
 /**
  * Loading state for the review page.
  * Matches the final layout (header + viewer + panel) so there's no layout shift
  * when real content arrives.
  */
-export function ReviewSkeleton() {
+export const ReviewSkeleton = memo(function ReviewSkeleton() {
   return (
     <div className="review-layout" aria-busy="true" aria-label="Loading review…">
       <div className="skeleton skeleton--header" />
@@ -13,4 +15,4 @@ export function ReviewSkeleton() {
       </div>
     </div>
   )
-}
+})

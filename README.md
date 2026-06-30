@@ -15,7 +15,7 @@ Open `http://localhost:5173` and click **Open demo review**.
 
 **Live demo:** [https://hv-review.vercel.app](https://hv-review.vercel.app) — automatically deploys on every push to `main` via Vercel.
 
-> **Demo PDF:** The sample file is at `public/example_document.pdf`. The mock API returns that path as `pdf_url`; in production it would be a CDN URL. `DocumentViewer` accepts any URL and needs no changes.
+> **Demo PDF:** The file lives in the repo at `public/example_document.pdf`. Vite serves everything in `public/` from the site root, so the mock API's `pdf_url` field is the served path `/example_document.pdf` (see `src/api/mock/review.json`). In production, `pdf_url` would be a full CDN URL instead — `DocumentViewer` takes whatever URL it's given and needs no changes either way.
 
 ---
 

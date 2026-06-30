@@ -33,6 +33,8 @@ export const IssuesPanel = memo(function IssuesPanel(rawProps: IssuesPanelProps)
   const [filter, setFilter] = useState<Filter>('all')
 
   // Filter tabs narrow the list only — submission gating in SubmitBar always uses the full issue set.
+  // Re-bucket by severity (not just filtered) so rendering below can always iterate
+  // SEVERITY_ORDER and get a fixed critical → major → minor grouping with section headers.
   const grouped = useMemo(() => {
     const source = filter === 'all' ? issues : issues.filter(i => i.severity === filter)
     return SEVERITY_ORDER.reduce<Record<IssueSeverity, Issue[]>>(
@@ -44,6 +46,8 @@ export const IssuesPanel = memo(function IssuesPanel(rawProps: IssuesPanelProps)
     )
   }, [issues, filter])
 
+  // Counts are computed from the unfiltered `issues` (not `grouped`) so filter button
+  // badges always show totals — they shouldn't shrink just because a filter is active.
   const counts = useMemo(
     () =>
       SEVERITY_ORDER.reduce<Record<IssueSeverity, number>>(
@@ -56,6 +60,7 @@ export const IssuesPanel = memo(function IssuesPanel(rawProps: IssuesPanelProps)
     [issues]
   )
 
+  // Filter is 'all' | IssueSeverity; the cast is safe once 'all' is excluded by the ternary.
   const visibleCount = filter === 'all' ? issues.length : counts[filter as IssueSeverity]
 
   return (

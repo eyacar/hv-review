@@ -145,7 +145,8 @@ export const DocumentViewer = memo(function DocumentViewer(rawProps: DocumentVie
     return () => clearTimeout(timeout)
   }, [currentPage])
 
-  // One observer per page handles two concerns:
+  // One observer per page handles two concerns at different thresholds, fired from the
+  // same IntersectionObserverEntry so we don't pay for two separate observers per page:
   //   threshold 0.1 → page is entering the viewport → start rendering PDF content (lazy mount)
   //   threshold 0.5 → page is mostly visible → update currentPage (skip if programmatic scroll)
   // Once a page is added to visiblePages it stays there — avoids re-parsing PDF data on scroll-back.
@@ -184,6 +185,8 @@ export const DocumentViewer = memo(function DocumentViewer(rawProps: DocumentVie
     [setCurrentPage]
   )
 
+  // react-pdf re-rasterizes at the given width, so width itself encodes zoom —
+  // there's no separate CSS transform/scale to keep in sync with text-layer hit boxes.
   const pageWidth = Math.floor(containerWidth * zoom)
 
   return (

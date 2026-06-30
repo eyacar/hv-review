@@ -3,12 +3,13 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useReviewStore } from '../../store/reviewStore'
 import { cn } from '../../../../lib/cn'
+import { resolveAssetUrl } from '../../../../lib/assets'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
 // Configure pdfjs worker as a static asset (Vite serves it from public/)
 // This keeps the heavy decode work off the main thread
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+pdfjs.GlobalWorkerOptions.workerSrc = resolveAssetUrl('pdf.worker.min.mjs')
 
 const ZOOM_MIN = 0.5
 const ZOOM_MAX = 2.0
@@ -281,31 +282,61 @@ export const DocumentViewer = memo(function DocumentViewer({
           className="document-viewer__document"
         >
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
-            <div
+            <DocumentPageSlot
               key={pageNum}
-              ref={el => handlePageRef(el, pageNum)}
-              className={cn('document-viewer__page-wrapper', {
-                'document-viewer__page-wrapper--active': pageNum === currentPage,
-              })}
-            >
-              {visiblePages.has(pageNum) ? (
-                // Only mount <Page> once the wrapper has entered the viewport.
-                // The wrapper div maintains scroll height so layout is stable.
-                <Page
-                  pageNumber={pageNum}
-                  renderTextLayer={true}
-                  renderAnnotationLayer={true}
-                  className="document-viewer__page"
-                  loading={<PageSkeleton />}
-                  width={pageWidth}
-                />
-              ) : (
-                <PageSkeleton />
-              )}
-            </div>
+              pageNum={pageNum}
+              isActive={pageNum === currentPage}
+              isVisible={visiblePages.has(pageNum)}
+              pageWidth={pageWidth}
+              onPageRef={handlePageRef}
+            />
           ))}
         </Document>
       </div>
+    </div>
+  )
+})
+
+interface DocumentPageSlotProps {
+  pageNum: number
+  isActive: boolean
+  isVisible: boolean
+  pageWidth: number
+  onPageRef: (el: HTMLDivElement | null, pageNum: number) => void
+}
+
+/** Stable ref callback per page — avoids IntersectionObserver churn on parent re-renders. */
+const DocumentPageSlot = memo(function DocumentPageSlot({
+  pageNum,
+  isActive,
+  isVisible,
+  pageWidth,
+  onPageRef,
+}: DocumentPageSlotProps) {
+  const setRef = useCallback(
+    (el: HTMLDivElement | null) => onPageRef(el, pageNum),
+    [onPageRef, pageNum]
+  )
+
+  return (
+    <div
+      ref={setRef}
+      className={cn('document-viewer__page-wrapper', {
+        'document-viewer__page-wrapper--active': isActive,
+      })}
+    >
+      {isVisible ? (
+        <Page
+          pageNumber={pageNum}
+          renderTextLayer={true}
+          renderAnnotationLayer={true}
+          className="document-viewer__page"
+          loading={<PageSkeleton />}
+          width={pageWidth}
+        />
+      ) : (
+        <PageSkeleton />
+      )}
     </div>
   )
 })

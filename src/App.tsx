@@ -6,48 +6,51 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const ReviewPage = lazy(() => import('./pages/ReviewPage'))
 const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'))
 
-const router = createBrowserRouter([
-  {
-    path: '/upload',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <ComingSoonPage title="Upload" />
-      </Suspense>
-    ),
-  },
-  {
-    path: '/processing/:id',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <ComingSoonPage title="Processing" />
-      </Suspense>
-    ),
-  },
-  {
-    path: '/reviews/:id',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <ReviewPage />
-      </Suspense>
-    ),
-  },
-  {
-    path: '/reviews/:id/submitted',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <ComingSoonPage title="Submitted" />
-      </Suspense>
-    ),
-  },
-  {
-    path: '/',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <HomePage />
-      </Suspense>
-    ),
-  },
-])
+const router = createBrowserRouter(
+  [
+    {
+      path: '/upload',
+      element: (
+        <Suspense fallback={<PageLoader />}>
+          <ComingSoonPage title="Upload" />
+        </Suspense>
+      ),
+    },
+    {
+      path: '/processing/:id',
+      element: (
+        <Suspense fallback={<PageLoader />}>
+          <ComingSoonPage title="Processing" />
+        </Suspense>
+      ),
+    },
+    {
+      path: '/reviews/:id',
+      element: (
+        <Suspense fallback={<PageLoader />}>
+          <ReviewPage />
+        </Suspense>
+      ),
+    },
+    {
+      path: '/reviews/:id/submitted',
+      element: (
+        <Suspense fallback={<PageLoader />}>
+          <ComingSoonPage title="Submitted" />
+        </Suspense>
+      ),
+    },
+    {
+      path: '/',
+      element: (
+        <Suspense fallback={<PageLoader />}>
+          <HomePage />
+        </Suspense>
+      ),
+    },
+  ],
+  { basename: import.meta.env.BASE_URL }
+)
 
 function PageLoader() {
   return (

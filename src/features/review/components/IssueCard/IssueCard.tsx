@@ -45,6 +45,16 @@ export const IssueCard = memo(function IssueCard({ issue, isActive }: IssueCardP
     [ignored, issue.id, ignoreIssue, unignoreIssue]
   )
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        handleJumpToPage()
+      }
+    },
+    [handleJumpToPage]
+  )
+
   return (
     <div
       className={cn('issue-card', `issue-card--${issue.severity}`, {
@@ -54,7 +64,7 @@ export const IssueCard = memo(function IssueCard({ issue, isActive }: IssueCardP
       onClick={handleJumpToPage}
       role="button"
       tabIndex={0}
-      onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleJumpToPage()}
+      onKeyDown={handleKeyDown}
       aria-label={`${issue.title}, ${issue.severity} severity, page ${issue.page}`}
     >
       <div className="issue-card__header">

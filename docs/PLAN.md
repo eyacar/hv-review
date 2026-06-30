@@ -12,7 +12,7 @@ This document covers the architectural decisions made for the HomeVision Documen
 - Issue severity logic — block submission if any critical or major issues remain
 - Minor issue handling — users can ignore them individually
 - Mock API layer — `getReview()` returns spec-provided data; real implementation is a one-line swap
-- Submit button — wired to the enable/disable logic; no actual API call (endpoint not ready)
+- Submit button — wired to enable/disable logic and a mock `submitReview()` stub
 
 **Out of scope:**
 
@@ -34,13 +34,13 @@ Vite gives a faster dev experience, simpler config, and a cleaner mental model f
 
 My go-to for component-heavy UIs, and the right fit here given the shared state complexity. TypeScript is configured in strict mode — no `any`, explicit types everywhere. This isn't just a style preference; it makes refactoring safer as the codebase grows and is something I care about in every project I work on.
 
-### Tailwind CSS + shadcn/ui
+### CSS custom properties
 
-Tailwind for utility-first styling with design tokens (CSS variables) for consistency. shadcn/ui for accessible, unstyled-by-default components that I own and can customize — not a black-box component library. This combo is fast to work with and produces production-quality results.
+Styling uses BEM class names in `global.css` with design tokens as CSS variables in `src/styles/tokens.css`. No utility-class framework — tokens drive every surface, text, severity, and button color so theming and handoffs stay straightforward.
 
-Design tokens are CSS variables defined in `src/styles/tokens.css`. The entire visual language lives there — changing a token updates every component that uses it, which makes theming and handoffs straightforward.
+Design tokens are CSS variables defined in `src/styles/tokens.css`. The entire visual language lives there — changing a token updates every component that uses it.
 
-**Light/Dark theme** is supported out of the box. Tokens are defined under `:root` (light) and `[data-theme="dark"]` (dark). The active theme is stored in `localStorage` and applied on `<html>` before first paint to avoid flash. Tailwind's `darkMode: 'class'` strategy is used so Tailwind utilities respect the theme too.
+**Light/Dark theme** is supported out of the box. Tokens are defined under `:root` (light) and `[data-theme="dark"]` (dark). The active theme is stored in `localStorage` and applied on `<html>` before first paint to avoid flash.
 
 ```css
 :root {
@@ -376,12 +376,13 @@ Two pipelines:
 **`ci.yml`** — runs on every push and PR to `main`:
 
 1. Install dependencies
-2. Type check (`tsc --noEmit`)
+2. Type check (`tsc -b --noEmit`)
 3. Lint (`eslint`)
-4. Run tests (`vitest run`)
-5. Build (`vite build`)
+4. Format check (`prettier --check`)
+5. Run tests (`vitest run`)
+6. Build (`vite build`)
 
-**`deploy.yml`** (placeholder) — runs on merge to `main`. Since `vite build` produces a static bundle, it can be deployed to any static hosting provider without changes to the pipeline.
+**Vercel** — production deploys on push to `main` via the Vercel Git integration. `vercel.json` rewrites all routes to `index.html` for client-side routing. No GitHub Actions deploy workflow needed.
 
 ### Commit Convention
 

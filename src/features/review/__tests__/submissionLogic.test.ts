@@ -1,23 +1,12 @@
 /**
  * Pure unit tests for the submission-gating logic.
  *
- * This logic lives inside SubmitBar (as a useMemo), but because it's pure
- * filtering it can be tested here without any React or mocking setup.
  * These tests verify the core business rule:
  *   "A review cannot be submitted while unignored critical or major issues remain."
  */
 import { describe, it, expect } from 'vitest'
 import type { Issue } from '../../../api/types'
-
-// Mirrors the useMemo in SubmitBar exactly
-function getBlockingIssues(issues: Issue[], ignoredIds: Set<string>): Issue[] {
-  return issues.filter(
-    i => (i.severity === 'critical' || i.severity === 'major') && !ignoredIds.has(i.id)
-  )
-}
-
-const canSubmit = (issues: Issue[], ignoredIds: Set<string>): boolean =>
-  getBlockingIssues(issues, ignoredIds).length === 0
+import { canSubmit, getBlockingIssues, getBlockingCount } from '../lib/submissionLogic'
 
 // ── Fixtures ──────────────────────────────────────────────────
 
@@ -67,5 +56,7 @@ describe('submission gating', () => {
     expect(getBlockingIssues(issues, new Set())).toHaveLength(2)
     expect(getBlockingIssues(issues, new Set(['c1']))).toHaveLength(1)
     expect(getBlockingIssues(issues, new Set(['c1', 'm1']))).toHaveLength(0)
+    expect(getBlockingCount(issues, new Set())).toBe(2)
+    expect(getBlockingCount(issues, new Set(['c1', 'm1']))).toBe(0)
   })
 })

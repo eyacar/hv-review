@@ -1,10 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 
-/**
- * Utility for merging Tailwind classes conditionally.
- * Combines clsx (conditional classes) with tailwind-merge (deduplication).
- */
+/** Merge conditional class names (BEM-style CSS classes in this project). */
 export function cn(...inputs: ClassValue[]): string {
-  return twMerge(clsx(inputs))
+  return clsx(inputs)
 }

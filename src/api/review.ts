@@ -1,4 +1,6 @@
 import { ReviewSchema } from './schemas'
+import type { Review } from './types'
+import { resolveAssetUrl } from '../lib/assets'
 import mockData from './mock/review.json'
 // Real implementation uses: import { getToken } from '../lib/auth'
 
@@ -28,7 +30,14 @@ export async function getReview(id: string): Promise<Review> {
     await new Promise(resolve => setTimeout(resolve, 600))
     // ReviewSchema.parse validates the shape at runtime — catches API drift early.
     // The inferred return type already matches Review; no cast needed.
-    return ReviewSchema.parse(mockData)
+    const review = ReviewSchema.parse(mockData)
+    return {
+      ...review,
+      document: {
+        ...review.document,
+        pdf_url: resolveAssetUrl(review.document.pdf_url),
+      },
+    }
   } catch (err) {
     // Catches: missing ID, schema validation errors, and in production — network
     // failures and non-2xx HTTP responses. Rethrows with cause so React Query

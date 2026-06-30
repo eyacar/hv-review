@@ -13,22 +13,27 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { IssueCard } from './IssueCard'
 import type { Issue } from '../../../../api/types'
 
-// ── Zustand mock ──────────────────────────────────────────────
+// ── Zustand mock (selector-aware) ─────────────────────────────
 
 const mockSetCurrentPage = vi.fn()
 const mockSetActiveMobileTab = vi.fn()
 const mockIgnoreIssue = vi.fn()
 const mockUnignoreIssue = vi.fn()
-let mockIsIgnored = vi.fn(() => false)
+let ignoredIssues = new Set<string>()
 
-vi.mock('../../store/reviewStore', () => ({
-  useReviewStore: () => ({
+function createMockState() {
+  return {
+    ignoredIssues,
     setCurrentPage: mockSetCurrentPage,
     setActiveMobileTab: mockSetActiveMobileTab,
     ignoreIssue: mockIgnoreIssue,
     unignoreIssue: mockUnignoreIssue,
-    isIgnored: mockIsIgnored,
-  }),
+  }
+}
+
+vi.mock('../../store/reviewStore', () => ({
+  useReviewStore: <T,>(selector: (state: ReturnType<typeof createMockState>) => T): T =>
+    selector(createMockState()),
 }))
 
 // ── Fixtures ──────────────────────────────────────────────────
@@ -53,7 +58,7 @@ const minorIssue: Issue = {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockIsIgnored = vi.fn(() => false)
+  ignoredIssues = new Set()
 })
 
 describe('IssueCard — rendering', () => {
@@ -95,6 +100,14 @@ describe('IssueCard — navigation', () => {
     })
     expect(mockSetCurrentPage).toHaveBeenCalledWith(3)
   })
+
+  it('navigates on Space key', () => {
+    render(<IssueCard issue={criticalIssue} isActive={false} />)
+    fireEvent.keyDown(screen.getByRole('button', { name: /missing appraisal signature/i }), {
+      key: ' ',
+    })
+    expect(mockSetCurrentPage).toHaveBeenCalledWith(3)
+  })
 })
 
 describe('IssueCard — ignore behavior', () => {
@@ -117,7 +130,7 @@ describe('IssueCard — ignore behavior', () => {
   })
 
   it('shows Unignore and calls unignoreIssue when issue is already ignored', () => {
-    mockIsIgnored = vi.fn(() => true)
+    ignoredIssues = new Set(['issue-2'])
     render(<IssueCard issue={minorIssue} isActive={false} />)
     const btn = screen.getByRole('button', { name: /unignore: formatting inconsistency/i })
     fireEvent.click(btn)

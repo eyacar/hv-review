@@ -1,14 +1,24 @@
-import { useMemo, useCallback, useEffect } from 'react'
+import { useMemo, useCallback, useEffect, lazy, Suspense } from 'react'
 import { useParams } from 'react-router-dom'
 import { FileText, AlertCircle } from 'lucide-react'
 import { useReview } from '../features/review/hooks/useReview'
 import { SubmitBar } from '../features/review/components/SubmitBar/SubmitBar'
 import { IssuesPanel } from '../features/review/components/IssuesPanel/IssuesPanel'
-import { DocumentViewer } from '../features/review/components/DocumentViewer/DocumentViewer'
 import { ReviewSkeleton } from '../features/review/components/ReviewSkeleton/ReviewSkeleton'
 import { ReviewError } from '../features/review/components/ReviewError/ReviewError'
 import { useReviewStore } from '../features/review/store/reviewStore'
+import { getBlockingCount } from '../features/review/lib/submissionLogic'
 import { cn } from '../lib/cn'
+
+const DocumentViewer = lazy(() =>
+  import('../features/review/components/DocumentViewer/DocumentViewer').then(module => ({
+    default: module.DocumentViewer,
+  }))
+)
+
+function DocumentViewerFallback() {
+  return <div className="skeleton skeleton--viewer" aria-label="Loading document viewer…" />
+}
 
 export default function ReviewPage() {
   const { id: reviewId = '' } = useParams<{ id: string }>()
@@ -31,15 +41,8 @@ export default function ReviewPage() {
     [review]
   )
 
-  // Mirrors the gate logic in SubmitBar — subtracts ignored issues so the
-  // mobile badge count stays in sync with the submit button state.
   const blockingCount = useMemo(
-    () =>
-      review
-        ? review.issues.filter(
-            i => (i.severity === 'critical' || i.severity === 'major') && !ignoredIssues.has(i.id)
-          ).length
-        : 0,
+    () => (review ? getBlockingCount(review.issues, ignoredIssues) : 0),
     [review, ignoredIssues]
   )
 
@@ -69,7 +72,12 @@ export default function ReviewPage() {
             'review-layout__panel--hidden': activeTab !== 'document',
           })}
         >
-          <DocumentViewer url={review.document.pdf_url} totalPages={review.document.pages.length} />
+          <Suspense fallback={<DocumentViewerFallback />}>
+            <DocumentViewer
+              url={review.document.pdf_url}
+              totalPages={review.document.pages.length}
+            />
+          </Suspense>
         </div>
         <div
           className={cn('review-layout__panel', {

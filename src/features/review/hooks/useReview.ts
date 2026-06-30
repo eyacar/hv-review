@@ -8,7 +8,7 @@ import type { Review } from '../../../api/types'
  * Behavior:
  * - Skips the fetch when `id` is empty (`enabled: false`) to avoid 404s during routing.
  * - React Query caches the result by `['review', id]` — navigating away and back won't re-fetch.
- * - On error, React Query retries 3 times with exponential backoff before surfacing `isError`.
+ * - On error, React Query retries once (see QueryClient defaults in `main.tsx`) before surfacing `isError`.
  * - When the real API is ready, only `getReview()` in `src/api/review.ts` changes — this hook
  *   and all consuming components stay the same.
  */

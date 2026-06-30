@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { CheckCircle, XCircle, Upload, Check } from 'lucide-react'
 import { useReviewStore } from '../../store/reviewStore'
 import { useSubmitReview } from '../../hooks/useReview'
+import { canSubmit, getBlockingIssues } from '../../lib/submissionLogic'
 import { cn } from '../../../../lib/cn'
 import { ThemeToggle } from '../../../../shared/components/ThemeToggle/ThemeToggle'
 import type { Issue, ReviewStatus } from '../../../../api/types'
@@ -61,10 +62,6 @@ const StepIndicator = memo(function StepIndicator({ status }: { status: ReviewSt
   )
 })
 
-// Severities that block submission — defined at module level so it's not recreated on each render.
-// Minor issues are never blocking; they can be individually ignored by the reviewer.
-const BLOCKING_SEVERITIES = new Set<string>(['critical', 'major'])
-
 // ── SubmitBar ─────────────────────────────────────────────────
 
 interface SubmitBarProps {
@@ -110,16 +107,16 @@ export const SubmitBar = memo(function SubmitBar({
   const blockingDescId = useId()
 
   const blockingIssues = useMemo(
-    () => issues.filter(i => BLOCKING_SEVERITIES.has(i.severity) && !ignoredIssues.has(i.id)),
+    () => getBlockingIssues(issues, ignoredIssues),
     [issues, ignoredIssues]
   )
 
-  const canSubmit = useMemo(() => blockingIssues.length === 0, [blockingIssues])
+  const submitAllowed = useMemo(() => canSubmit(issues, ignoredIssues), [issues, ignoredIssues])
 
   const handleSubmit = useCallback(() => {
-    if (!canSubmit || isPending) return
+    if (!submitAllowed || isPending) return
     submit(reviewId)
-  }, [canSubmit, isPending, submit, reviewId])
+  }, [submitAllowed, isPending, submit, reviewId])
 
   useEffect(() => {
     document.title = `${reviewName} — Review`
@@ -149,7 +146,7 @@ export const SubmitBar = memo(function SubmitBar({
 
           <div className="submit-bar__actions">
             <ThemeToggle />
-            {!canSubmit && (
+            {!submitAllowed && (
               <p id={blockingDescId} className="submit-bar__blocking-msg" role="alert">
                 <XCircle size={14} aria-hidden="true" />
                 {blockingIssues.length} issue{blockingIssues.length > 1 ? 's' : ''} blocking
@@ -163,7 +160,7 @@ export const SubmitBar = memo(function SubmitBar({
               </p>
             )}
 
-            {!canSubmit && (
+            {!submitAllowed && (
               <Link
                 to="/upload"
                 className="btn btn--secondary btn--icon-mobile"
@@ -176,10 +173,10 @@ export const SubmitBar = memo(function SubmitBar({
 
             <button
               type="button"
-              className={cn('btn btn--primary', { 'btn--disabled': !canSubmit || isPending })}
+              className={cn('btn btn--primary', { 'btn--disabled': !submitAllowed || isPending })}
               onClick={handleSubmit}
-              aria-disabled={!canSubmit || isPending}
-              aria-describedby={!canSubmit ? blockingDescId : undefined}
+              aria-disabled={!submitAllowed || isPending}
+              aria-describedby={!submitAllowed ? blockingDescId : undefined}
             >
               {isPending ? 'Submitting…' : 'Submit Review'}
             </button>

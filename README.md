@@ -13,24 +13,26 @@ npm run dev        # starts at http://localhost:5173
 
 Open `http://localhost:5173` and click **Open demo review**.
 
-> **Note:** there is no live deploy — the demo PDF (`public/example_document.pdf`) is served by the local Vite dev server. The `dev` server must be running for the viewer to load it. In production, `pdf_url` in the API response would point to a CDN URL; the viewer component doesn't change.
+**Live demo:** [https://hv-review.vercel.app](https://hv-review.vercel.app) — auto-deploys on every push to `main` via [Vercel](https://vercel.com). One-time setup: import this repo at [vercel.com/new](https://vercel.com/new) (framework preset: **Vite**, build: `npm run build`, output: `dist`). `vercel.json` handles SPA routing.
+
+> **Note:** locally, the demo PDF (`public/example_document.pdf`) is served by the Vite dev server. In production, `pdf_url` in the API response points to a CDN URL; `DocumentViewer` works unchanged.
 
 ---
 
 ## Scripts
 
-| Command                | What it does                         |
-| ---------------------- | ------------------------------------ |
-| `npm run dev`          | Dev server with HMR                  |
-| `npm run build`        | Type-check + production bundle       |
-| `npm run typecheck`    | `tsc --noEmit` only (no emit)        |
-| `npm run lint`         | ESLint across all source files       |
-| `npm run lint:fix`     | ESLint with auto-fix                 |
-| `npm run format`       | Prettier write                       |
-| `npm run format:check` | Prettier check (used in CI)          |
-| `npm run test`         | Vitest single run                    |
-| `npm run test:watch`   | Vitest interactive watch mode        |
-| `npm run preview`      | Preview the production build locally |
+| Command                | What it does                               |
+| ---------------------- | ------------------------------------------ |
+| `npm run dev`          | Dev server with HMR                        |
+| `npm run build`        | Type-check + production bundle             |
+| `npm run typecheck`    | `tsc -b --noEmit` (all project references) |
+| `npm run lint`         | ESLint across all source files             |
+| `npm run lint:fix`     | ESLint with auto-fix                       |
+| `npm run format`       | Prettier write                             |
+| `npm run format:check` | Prettier check (used in CI)                |
+| `npm run test`         | Vitest single run                          |
+| `npm run test:watch`   | Vitest interactive watch mode              |
+| `npm run preview`      | Preview the production build locally       |
 
 CI runs `typecheck → lint → format:check → test → build` on every push and PR to `main`.
 
@@ -63,6 +65,7 @@ src/
 │
 ├── features/review/       # Everything for the Review page
 │   ├── __tests__/         # Pure unit tests (submission logic)
+│   ├── lib/               # Pure helpers (submission gating)
 │   ├── components/
 │   │   ├── DocumentViewer/  # PDF viewer: zoom, drag-to-scroll, lazy pages
 │   │   ├── IssuesPanel/     # Issue list with severity filter tabs
@@ -171,26 +174,24 @@ All shapes are defined as Zod schemas in `src/api/schemas.ts` and inferred at co
 {
   id: string
   name: string
-  version: string
-  status: 'pending' | 'approved' | 'rejected'
+  version: number
+  status: 'created' | 'processing' | 'on_review' | 'submitted'
   uploaded_at: string // ISO 8601
   user: {
     id: string
     first_name: string
     last_name: string
-    email: string
   }
   document: {
-    id: string
     pdf_url: string // CDN or local path
-    pages: Array<{ id: string; page_number: number }>
+    pages: Array<{ page_num: number; height: number; width: number }>
   }
   issues: Array<{
     id: string
     title: string
     description: string
     severity: 'critical' | 'major' | 'minor'
-    page_number: number
+    page: number
   }>
 }
 ```
@@ -218,13 +219,17 @@ npm run test:watch     # interactive watch mode
 
 **Coverage:**
 
-`features/review/__tests__/submissionLogic.test.ts` — 8 pure unit tests with no React or DOM involved. Tests the submission gating rules in isolation: blocking issues prevent submit, ignored issues are excluded from the count, edge cases (empty list, all ignored, mixed severities). These run in under 50ms.
+`features/review/__tests__/submissionLogic.test.ts` — 8 pure unit tests against `src/features/review/lib/submissionLogic.ts`. Tests the submission gating rules in isolation: blocking issues prevent submit, ignored issues are excluded from the count, edge cases (empty list, all ignored, mixed severities). These run in under 50ms.
 
 `features/review/components/IssueCard/IssueCard.test.tsx` — component tests with `@testing-library/react`. Covers: renders issue title and description, clicking card calls `setCurrentPage`, ignore/unignore toggles aria state and removes the issue from the blocking count, active state applied correctly.
 
+`features/review/components/IssuesPanel/IssuesPanel.test.tsx` — filter tabs narrow the list by severity; empty state when a filter matches nothing.
+
+`features/review/components/SubmitBar/SubmitBar.test.tsx` — submit button uses `aria-disabled` while blocking issues remain; blocking count message renders; submit is allowed when only minor issues exist.
+
 `features/review/components/StatusBadge/StatusBadge.test.tsx` — accessibility regression tests for WCAG 1.4.1 (use of color). Verifies each severity badge communicates its level via visible text and icon, not color alone. Prevents regressions if badge markup is refactored.
 
-**What's not tested and why:** `DocumentViewer` is not unit-tested because it depends on `pdfjs-dist` which requires a real browser canvas context — this is better covered by an e2e test. `IssuesPanel` filter logic is covered indirectly via `submissionLogic` and `IssueCard` tests.
+**What's not tested and why:** `DocumentViewer` is not unit-tested because it depends on `pdfjs-dist` which requires a real browser canvas context — better covered by an e2e test (Playwright). It is lazy-loaded to keep the initial review route bundle smaller.
 
 ---
 
@@ -232,7 +237,7 @@ npm run test:watch     # interactive watch mode
 
 GitHub Actions runs on every push and PR to `main`:
 
-1. `typecheck` — `tsc --noEmit`
+1. `typecheck` — `tsc -b --noEmit`
 2. `lint` — ESLint
 3. `format:check` — Prettier
 4. `test` — Vitest

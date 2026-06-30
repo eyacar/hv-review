@@ -21,18 +21,18 @@ Open `http://localhost:5173` and click **Open demo review**.
 
 ## Scripts
 
-| Command                | What it does                               |
-| ---------------------- | ------------------------------------------ |
-| `npm run dev`          | Dev server with HMR                        |
-| `npm run build`        | Type-check + production bundle             |
-| `npm run typecheck`    | `tsc -b --noEmit` (all project references) |
-| `npm run lint`         | ESLint across all source files             |
-| `npm run lint:fix`     | ESLint with auto-fix                       |
-| `npm run format`       | Prettier write                             |
-| `npm run format:check` | Prettier check (used in CI)                |
-| `npm run test`         | Vitest single run                          |
-| `npm run test:watch`   | Vitest interactive watch mode              |
-| `npm run preview`      | Preview the production build locally       |
+| Command                | Description                                   |
+| ---------------------- | --------------------------------------------- |
+| `npm run dev`          | Starts the Vite dev server with HMR           |
+| `npm run build`        | Type-checks and builds the production bundle  |
+| `npm run typecheck`    | Runs TypeScript across all project references |
+| `npm run lint`         | Runs ESLint on all source files               |
+| `npm run lint:fix`     | Runs ESLint with auto-fix                     |
+| `npm run format`       | Formats all files with Prettier               |
+| `npm run format:check` | Checks Prettier formatting (used in CI)       |
+| `npm run test`         | Runs the Vitest test suite once               |
+| `npm run test:watch`   | Runs Vitest in watch mode                     |
+| `npm run preview`      | Serves the production build locally           |
 
 CI runs `typecheck → lint → format:check → test → build` on every push and PR to `main`.
 
@@ -134,7 +134,7 @@ src/
 
 ## Mock API
 
-`src/api/review.ts` exports `getReview()` and `submitReview()` with simulated latency (600 ms / 800 ms). The mock validates the review ID and returns data only for the demo review (`souj5sd12c8a3f`); unknown IDs throw a not-found error. Swap the function bodies for real `fetch` calls — hooks and components stay unchanged.
+`src/api/review.ts` exports `getReview()` and `submitReview()` with simulated latency (600 ms / 800 ms). The mock validates the review ID and returns data only for the demo review (`souj5sd12c8a3f`); unknown IDs throw a typed `ApiError` with a `NOT_FOUND` code. Errors are mapped to user-facing copy via `getApiErrorMessage()` in `src/api/errors.ts`.
 
 ### API Contract
 
@@ -197,7 +197,8 @@ npm run test:watch     # interactive watch mode
 | `SubmitBar.test.tsx`      | `aria-disabled` gating, blocking message, submit action       |
 | `DocumentViewer.test.tsx` | Toolbar controls, page navigation, zoom, page wrapper count   |
 | `StatusBadge.test.tsx`    | WCAG 1.4.1 — severity via text, not color alone               |
-| `review.test.ts`          | Mock API: valid ID returns data, unknown ID throws 404-style  |
+| `review.test.ts`          | Mock API: valid ID, not-found, typed ApiError codes           |
+| `errors.test.ts`          | ApiError code mapping to user-facing messages                 |
 
 ---
 

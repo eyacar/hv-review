@@ -4,6 +4,7 @@ import { CheckCircle, XCircle, Upload, Check } from 'lucide-react'
 import { useReviewStore } from '../../store/reviewStore'
 import { useSubmitReview } from '../../hooks/useReview'
 import { canSubmit, getBlockingIssues } from '../../lib/submissionLogic'
+import { getApiErrorMessage } from '../../../../api/errors'
 import { cn } from '../../../../lib/cn'
 import { ThemeToggle } from '../../../../shared/components/ThemeToggle/ThemeToggle'
 import type { ReviewStatus } from '../../../../api/types'
@@ -81,7 +82,7 @@ export const SubmitBar = memo(function SubmitBar(rawProps: SubmitBarProps) {
   const { reviewId, reviewName, version, status, uploadedAt, userName, issues } =
     SubmitBarPropsSchema.parse(rawProps)
   const ignoredIssues = useReviewStore(state => state.ignoredIssues)
-  const { mutate: submit, isPending, isSuccess } = useSubmitReview()
+  const { mutate: submit, isPending, isSuccess, isError, error: submitError } = useSubmitReview()
   const blockingDescId = useId()
 
   const blockingIssues = useMemo(
@@ -135,6 +136,13 @@ export const SubmitBar = memo(function SubmitBar(rawProps: SubmitBarProps) {
               <p className="submit-bar__success-msg">
                 <CheckCircle size={14} aria-hidden="true" />
                 Submitted
+              </p>
+            )}
+
+            {isError && (
+              <p className="submit-bar__blocking-msg" role="alert">
+                <XCircle size={14} aria-hidden="true" />
+                {getApiErrorMessage(submitError, 'Failed to submit review')}
               </p>
             )}
 

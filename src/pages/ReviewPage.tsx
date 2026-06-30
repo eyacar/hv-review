@@ -8,6 +8,7 @@ import { ReviewSkeleton } from '../features/review/components/ReviewSkeleton/Rev
 import { ReviewError } from '../features/review/components/ReviewError/ReviewError'
 import { useReviewStore } from '../features/review/store/reviewStore'
 import { getBlockingCount } from '../features/review/lib/submissionLogic'
+import { getApiErrorMessage } from '../api/errors'
 import { cn } from '../lib/cn'
 
 const DocumentViewer = lazy(() =>
@@ -51,7 +52,11 @@ export default function ReviewPage() {
   const handleIssuesTab = useCallback(() => setActiveTab('issues'), [setActiveTab])
 
   if (isLoading) return <ReviewSkeleton />
-  if (isError) return <ReviewError message={error.message} onRetry={refetch} />
+  if (isError) {
+    return (
+      <ReviewError message={getApiErrorMessage(error, 'Failed to load review')} onRetry={refetch} />
+    )
+  }
   if (!review) return null
 
   return (

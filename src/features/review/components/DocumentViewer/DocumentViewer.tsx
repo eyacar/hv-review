@@ -43,6 +43,18 @@ export const DocumentViewer = memo(function DocumentViewer({
   const [zoom, setZoom] = useState(ZOOM_DEFAULT)
   const isDragging = useRef(false)
   const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
+  // Pages that have entered the viewport at least once — once rendered, stay rendered
+  // to avoid re-parsing PDF data on scroll-back.
+  const [visiblePages, setVisiblePages] = useState<ReadonlySet<number>>(() => new Set([1]))
+  // Stores per-page observers so we can disconnect on unmount or ref change
+  const observersRef = useRef<Map<number, IntersectionObserver>>(new Map())
+
+  // Disconnect all observers on unmount
+  useEffect(() => {
+    return () => {
+      observersRef.current.forEach(obs => obs.disconnect())
+    }
+  }, [])
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     // Only drag with left button; ignore clicks on interactive elements inside
@@ -114,28 +126,40 @@ export const DocumentViewer = memo(function DocumentViewer({
     return () => clearTimeout(timeout)
   }, [currentPage])
 
-  // Track which page is visible as the user scrolls.
-  // Each page wrapper gets its own IntersectionObserver scoped to the scroll container.
-  // threshold: 0.5 means the page must be at least 50% visible before it's considered "current".
-  // We skip updates while isScrollingProgrammatically is true to avoid fighting the
-  // programmatic scroll triggered by clicking an issue card.
+  // One observer per page handles two concerns:
+  //   threshold 0.1 → page is entering the viewport → start rendering PDF content (lazy mount)
+  //   threshold 0.5 → page is mostly visible → update currentPage (skip if programmatic scroll)
+  // Once a page is added to visiblePages it stays there — avoids re-parsing PDF data on scroll-back.
   const handlePageRef = useCallback(
     (el: HTMLDivElement | null, pageNum: number) => {
       pageRefs.current[pageNum - 1] = el
+
+      // Clean up any existing observer for this slot before attaching a new one
+      observersRef.current.get(pageNum)?.disconnect()
+      observersRef.current.delete(pageNum)
 
       if (!el) return
 
       const observer = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting && !isScrollingProgrammatically.current) {
+          if (entry.intersectionRatio >= 0.1) {
+            // Lazy-mount: mark page as visible so <Page> renders
+            setVisiblePages(prev => {
+              if (prev.has(pageNum)) return prev
+              const next = new Set(prev)
+              next.add(pageNum)
+              return next
+            })
+          }
+          if (entry.intersectionRatio >= 0.5 && !isScrollingProgrammatically.current) {
             setCurrentPage(pageNum)
           }
         },
-        { root: containerRef.current, threshold: 0.5 }
+        { root: containerRef.current, threshold: [0.1, 0.5] }
       )
 
       observer.observe(el)
-      return () => observer.disconnect()
+      observersRef.current.set(pageNum, observer)
     },
     [setCurrentPage]
   )
@@ -245,14 +269,20 @@ export const DocumentViewer = memo(function DocumentViewer({
                 'document-viewer__page-wrapper--active': pageNum === currentPage,
               })}
             >
-              <Page
-                pageNumber={pageNum}
-                renderTextLayer={true}
-                renderAnnotationLayer={true}
-                className="document-viewer__page"
-                loading={<PageSkeleton />}
-                width={pageWidth}
-              />
+              {visiblePages.has(pageNum) ? (
+                // Only mount <Page> once the wrapper has entered the viewport.
+                // The wrapper div maintains scroll height so layout is stable.
+                <Page
+                  pageNumber={pageNum}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  className="document-viewer__page"
+                  loading={<PageSkeleton />}
+                  width={pageWidth}
+                />
+              ) : (
+                <PageSkeleton />
+              )}
             </div>
           ))}
         </Document>

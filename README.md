@@ -1,7 +1,5 @@
 # hv-review — HomeVision Document Review
 
-> **Run it:** `npm install && npm run dev` → open [localhost:5173](http://localhost:5173) → click **Open demo review** _(dev server must be running — the demo PDF is served locally)_
-
 A take-home project implementing the Document Review page for HomeVision's mortgage document workflow. Reviewers can inspect AI-identified issues in uploaded PDFs, navigate between pages, filter issues by severity, and submit once all critical and major issues are resolved.
 
 ---
@@ -13,7 +11,9 @@ npm install
 npm run dev        # starts at http://localhost:5173
 ```
 
-Open `http://localhost:5173` — a home page with a button to the demo review.
+Open `http://localhost:5173` and click **Open demo review**.
+
+> **Note:** there is no live deploy — the demo PDF (`public/example_document.pdf`) is served by the local Vite dev server. The `dev` server must be running for the viewer to load it. In production, `pdf_url` in the API response would point to a CDN URL; the viewer component doesn't change.
 
 ---
 

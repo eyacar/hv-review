@@ -56,7 +56,7 @@ CI runs `typecheck → lint → format:check → test → build` on every push a
 
 ```
 src/
-├── api/                   # Data layer — swap mock bodies for real fetch calls
+├── api/                   # Data layer — swap mock data for real fetch calls
 │   ├── review.ts          # getReview(), submitReview()
 │   ├── types.ts           # Shared TypeScript types
 │   └── mock/review.json   # Mock data (spec-provided)
@@ -172,14 +172,21 @@ Defaults to the OS preference (`prefers-color-scheme`). If the user has previous
 ## Testing
 
 ```bash
-npm run test
+npm run test           # single run
+npm run test:watch     # interactive watch mode
 ```
 
-Three test files:
+**Strategy:** tests are split by concern — pure logic first, then components, then accessibility. No end-to-end tests (out of scope for this take-home; would use Playwright in production).
 
-- `features/review/__tests__/submissionLogic.test.ts` — 8 pure unit tests for submission gating (no React, no mocks, runs instantly)
-- `features/review/components/IssueCard/IssueCard.test.tsx` — rendering, navigation, ignore/unignore
-- `features/review/components/StatusBadge/StatusBadge.test.tsx` — WCAG 1.4.1: severity communicated via text, not color alone
+**Coverage:**
+
+`features/review/__tests__/submissionLogic.test.ts` — 8 pure unit tests with no React or DOM involved. Tests the submission gating rules in isolation: blocking issues prevent submit, ignored issues are excluded from the count, edge cases (empty list, all ignored, mixed severities). These run in under 50ms.
+
+`features/review/components/IssueCard/IssueCard.test.tsx` — component tests with `@testing-library/react`. Covers: renders issue title and description, clicking card calls `setCurrentPage`, ignore/unignore toggles aria state and removes the issue from the blocking count, active state applied correctly.
+
+`features/review/components/StatusBadge/StatusBadge.test.tsx` — accessibility regression tests for WCAG 1.4.1 (use of color). Verifies each severity badge communicates its level via visible text and icon, not color alone. Prevents regressions if badge markup is refactored.
+
+**What's not tested and why:** `DocumentViewer` is not unit-tested because it depends on `pdfjs-dist` which requires a real browser canvas context — this is better covered by an e2e test. `IssuesPanel` filter logic is covered indirectly via `submissionLogic` and `IssueCard` tests.
 
 ---
 

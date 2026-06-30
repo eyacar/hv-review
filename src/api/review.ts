@@ -24,11 +24,15 @@ import mockData from './mock/review.json'
 export async function getReview(id: string): Promise<Review> {
   try {
     if (!id) throw new Error('Review ID is required')
-    await new Promise(res => setTimeout(res, 600))
+    // Simulates ~600ms network round-trip. Replace with fetch() when the API is ready.
+    await new Promise(resolve => setTimeout(resolve, 600))
     // ReviewSchema.parse validates the shape at runtime — catches API drift early.
     // The inferred return type already matches Review; no cast needed.
     return ReviewSchema.parse(mockData)
   } catch (err) {
+    // Catches: missing ID, schema validation errors, and in production — network
+    // failures and non-2xx HTTP responses. Rethrows with cause so React Query
+    // surfaces a typed error to the UI without losing the original stack.
     throw new Error(
       err instanceof Error ? `Failed to load review: ${err.message}` : 'Failed to load review.',
       { cause: err }

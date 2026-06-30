@@ -1,5 +1,5 @@
 import { memo, useMemo, useCallback, useId, useEffect, Fragment } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { CheckCircle, XCircle, Upload, Check } from 'lucide-react'
 import { useReviewStore } from '../../store/reviewStore'
 import { useSubmitReview } from '../../hooks/useReview'
@@ -72,6 +72,7 @@ const StepIndicator = memo(function StepIndicator({ status }: { readonly status:
  * - Step indicator showing the full review workflow (Upload → Processing → Review → Submitted)
  * - Review metadata: version, date, assigned user — visible on the second row
  * - Submit button — blocked when critical/major issues remain
+ * - On successful submit, navigates to /reviews/:id/submitted after a brief confirmation delay
  * - "Upload new version" CTA — visible when blocking issues exist, links back to /upload
  *
  * Layout: 2-row header so metadata + stepper don't compete with actions for space.
@@ -84,6 +85,7 @@ export const SubmitBar = memo(function SubmitBar(rawProps: SubmitBarProps) {
   const ignoredIssues = useReviewStore(state => state.ignoredIssues)
   const { mutate: submit, isPending, isSuccess, isError, error: submitError } = useSubmitReview()
   const blockingDescId = useId()
+  const navigate = useNavigate()
 
   const blockingIssues = useMemo(
     () => getBlockingIssues(issues, ignoredIssues),
@@ -103,6 +105,15 @@ export const SubmitBar = memo(function SubmitBar(rawProps: SubmitBarProps) {
       document.title = 'Document Review — HomeVision'
     }
   }, [reviewName])
+
+  // Let the user see the "Submitted" confirmation before leaving the review page.
+  useEffect(() => {
+    if (!isSuccess) return
+    const timeout = setTimeout(() => {
+      navigate(`/reviews/${reviewId}/submitted`)
+    }, 1200)
+    return () => clearTimeout(timeout)
+  }, [isSuccess, navigate, reviewId])
 
   const formattedDate = useMemo(
     () =>

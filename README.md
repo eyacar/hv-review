@@ -170,7 +170,7 @@ All shapes are defined as Zod schemas in `src/api/schemas.ts` and inferred at co
 
 **`POST /reviews/:id/submit`** → `204 No Content`
 
-No request body. Returns 204 on success; the client treats any non-2xx as an error and surfaces it via the error state in `useSubmitReview`.
+No request body. Returns 204 on success; the client treats any non-2xx as an error and surfaces it via the error state in `useSubmitReview`. On success, `SubmitBar` shows a brief confirmation, then navigates to `/reviews/:id/submitted`.
 
 ---
 
@@ -199,6 +199,8 @@ npm run test:watch     # interactive watch mode
 | `StatusBadge.test.tsx`    | WCAG 1.4.1 — severity via text, not color alone               |
 | `review.test.ts`          | Mock API: valid ID, not-found, typed ApiError codes           |
 | `errors.test.ts`          | ApiError code mapping to user-facing messages                 |
+| `auth.test.ts`            | Token read/write/clear contract (not yet wired to a real API) |
+| `assets.test.ts`          | Asset URL resolution: relative paths vs. absolute URLs        |
 
 ---
 
